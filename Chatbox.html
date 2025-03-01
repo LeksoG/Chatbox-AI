@@ -1,0 +1,4062 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Advanced AI Assistant</title>
+  <style>
+    :root {
+      --primary: #7b68ee;
+      --primary-gradient: linear-gradient(135deg, #7b68ee 0%, #a891ff 100%);
+      --secondary: #a891ff;
+      --accent: #00d2ff;
+      --accent-gradient: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);
+      --dark: #1e1e2f;
+      --light: #f8faff;
+      --bg: #f2f5ff;
+      --gray: #e4e8f7;
+      --text: #2c2c3d;
+      --text-light: #6c7293;
+      --shadow: 0 15px 35px rgba(123, 104, 238, 0.15);
+      --card-shadow: 0 8px 24px rgba(0, 0, 0, 0.07);
+      --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      --fast-transition: all 0.2s ease-out;
+      --border-radius: 24px;
+      
+      /* Dark mode variables */
+      --dark-primary: #6355c7;
+      --dark-primary-gradient: linear-gradient(135deg, #6355c7 0%, #8c78e3 100%);
+      --dark-bg: #121220;
+      --dark-card: #1e1e30;
+      --dark-light: #2c2c42;
+      --dark-gray: #32324a;
+      --dark-text: #e6e6f0;
+      --dark-text-light: #a0a0c0;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', sans-serif;
+    }
+    
+    body {
+      background-color: var(--bg);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(123, 104, 238, 0.05) 0%, rgba(254, 254, 254, 0.05) 90%),
+        linear-gradient(135deg, rgba(123, 104, 238, 0.03) 0%, rgba(0, 210, 255, 0.03) 100%);
+      transition: var(--transition);
+    }
+    
+    body.dark-mode {
+      background-color: var(--dark-bg);
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(99, 85, 199, 0.07) 0%, rgba(30, 30, 48, 0.07) 90%),
+        linear-gradient(135deg, rgba(99, 85, 199, 0.05) 0%, rgba(0, 150, 220, 0.05) 100%);
+      color: var(--dark-text);
+    }
+    
+    .chat-container {
+      width: 100%;
+      max-width: 440px;
+      height: 700px;
+      background: white;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+      isolation: isolate;
+      transition: var(--transition);
+    }
+    
+    body.dark-mode .chat-container {
+      background: var(--dark-card);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+    }
+    
+    .chat-header {
+      padding: 16px 24px;
+      background: var(--primary-gradient);
+      color: white;
+      display: flex;
+      align-items: center;
+      position: relative;
+      z-index: 10;
+      transition: var(--transition);
+    }
+    
+    body.dark-mode .chat-header {
+      background: var(--dark-primary-gradient);
+    }
+    
+    .header-avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.15);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-right: 14px;
+      overflow: hidden;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+      position: relative;
+    }
+    
+    .header-avatar::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 100%);
+      border-radius: 14px;
+    }
+    
+    .avatar-icon {
+      font-size: 22px;
+      font-weight: bold;
+      background: linear-gradient(to right, #fff, #e0e0ff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .user-info {
+      flex: 1;
+    }
+    
+    .user-name {
+      font-weight: 700;
+      font-size: 18px;
+      margin-bottom: 2px;
+      letter-spacing: -0.3px;
+    }
+    
+    .user-status {
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      opacity: 0.9;
+    }
+    
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      background: #4ded6e;
+      border-radius: 50%;
+      margin-right: 6px;
+      position: relative;
+    }
+    
+    .status-dot::after {
+      content: '';
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      background: rgba(77, 237, 110, 0.4);
+      border-radius: 50%;
+      top: -3px;
+      left: -3px;
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 0.7; }
+      50% { transform: scale(1.5); opacity: 0; }
+      100% { transform: scale(1); opacity: 0; }
+    }
+    
+    .header-actions {
+      display: flex;
+    }
+    
+    .header-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.15);
+      cursor: pointer;
+      margin-left: 10px;
+      transition: var(--transition);
+    }
+    
+    .header-icon:hover {
+      background: rgba(255, 255, 255, 0.25);
+      transform: translateY(-2px);
+    }
+    
+    .theme-toggle {
+      position: relative;
+    }
+    
+    .theme-icon-light, .theme-icon-dark {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+    
+    .theme-icon-dark {
+      opacity: 0;
+      transform: rotate(90deg) scale(0.5);
+    }
+    
+    body.dark-mode .theme-icon-light {
+      opacity: 0;
+      transform: rotate(-90deg) scale(0.5);
+    }
+    
+    body.dark-mode .theme-icon-dark {
+      opacity: 1;
+      transform: rotate(0) scale(1);
+    }
+    
+    .chat-messages {
+      flex: 1;
+      padding: 30px;
+      overflow-y: auto;
+      background: white;
+      position: relative;
+      scrollbar-width: thin;
+      scrollbar-color: var(--gray) transparent;
+      scroll-behavior: smooth;
+      transition: var(--transition);
+    }
+    
+    body.dark-mode .chat-messages {
+      background: var(--dark-card);
+    }
+    
+    .chat-messages::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    .chat-messages::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    
+    .chat-messages::-webkit-scrollbar-thumb {
+      background-color: var(--gray);
+      border-radius: 20px;
+    }
+    
+    body.dark-mode .chat-messages::-webkit-scrollbar-thumb {
+      background-color: var(--dark-gray);
+    }
+    
+    .date-divider {
+      text-align: center;
+      margin: 20px 0;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .date-divider span {
+      background: white;
+      padding: 0 15px;
+      font-size: 12px;
+      color: var(--text-light);
+      position: relative;
+      z-index: 2;
+      transition: var(--transition);
+    }
+    
+    body.dark-mode .date-divider span {
+      background: var(--dark-card);
+      color: var(--dark-text-light);
+    }
+    
+    .date-divider::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 50%;
+      height: 1px;
+      background: var(--gray);
+      z-index: 1;
+      transition: var(--transition);
+    }
+    
+    body.dark-mode .date-divider::before {
+      background: var(--dark-gray);
+    }
+    
+    .message {
+      margin-bottom: 22px;
+      max-width: 85%;
+      animation: messageAnim 0.4s cubic-bezier(0.215, 0.61, 0.355, 1);
+      position: relative;
+      clear: both;
+    }
+    
+    @keyframes messageAnim {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .message-incoming {
+      float: left;
+    }
+    
+    .message-outgoing {
+      float: right;
+    }
+    
+    .message-content {
+      padding: 16px 20px;
+      border-radius: 22px;
+      position: relative;
+      line-height: 1.6;
+      font-size: 15px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s ease;
+    }
+    
+    body.dark-mode .message-content {
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    }
+    
+    .message-incoming .message-content {
+      background: var(--light);
+      color: var(--text);
+      border-bottom-left-radius: 6px;
+      border-left: 3px solid rgba(0, 210, 255, 0.4);
+      transition: var(--transition);
+    }
+    
+    body.dark-mode .message-incoming .message-content {
+      background: var(--dark-light);
+      color: var(--dark-text);
+      border-left: 3px solid rgba(0, 180, 220, 0.4);
+    }
+    
+    .message-outgoing .message-content {
+      background: var(--primary-gradient);
+      color: white;
+      border-bottom-right-radius: 6px;
+      transition: var(--transition);
+    }
+    
+    body.dark-mode .message-outgoing .message-content {
+      background: var(--dark-primary-gradient);
+    }
+    
+    .message-time {
+      font-size: 11px;
+      margin-top: 6px;
+      opacity: 0.75;
+      transition: var(--transition);
+    }
+    
+    .message-incoming .message-time {
+      color: var(--text-light);
+      margin-left: 5px;
+      float: left;
+      clear: both;
+    }
+    
+    body.dark-mode .message-incoming .message-time {
+      color: var(--dark-text-light);
+    }
+    
+    .message-outgoing .message-time {
+      color: var(--text-light);
+      margin-right: 5px;
+      float: right;
+      clear: both;
+    }
+    
+    body.dark-mode .message-outgoing .message-time {
+      color: var(--dark-text-light);
+    }
+    
+    /* Message reactions */
+    .message-reactions {
+      display: flex;
+      margin-top: 8px;
+      padding: 0 5px;
+    }
+    
+    .message-incoming .message-reactions {
+      justify-content: flex-start;
+      float: left;
+      clear: both;
+    }
+    
+    .message-outgoing .message-reactions {
+      justify-content: flex-end;
+      float: right;
+      clear: both;
+    }
+    
+    .reaction {
+      font-size: 14px;
+      background: white;
+      border-radius: 12px;
+      padding: 3px 8px;
+      margin-right: 6px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      transition: var(--transition);
+      animation: reactionPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    
+    body.dark-mode .reaction {
+      background: var(--dark-light);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+    
+    @keyframes reactionPop {
+      from { transform: scale(0); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    
+    .reaction:hover {
+      transform: scale(1.1);
+    }
+    
+    .reaction-count {
+      margin-left: 4px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-light);
+    }
+    
+    body.dark-mode .reaction-count {
+      color: var(--dark-text-light);
+    }
+    
+    .ai-indicator {
+      background: var(--accent-gradient);
+      color: white;
+      font-size: 10px;
+      font-weight: bold;
+      padding: 3px 10px;
+      border-radius: 10px;
+      position: absolute;
+      top: -12px;
+      left: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      box-shadow: 0 4px 10px rgba(0, 210, 255, 0.3);
+      backdrop-filter: blur(4px);
+    }
+    
+    .list-card {
+      background: white;
+      border-radius: 16px;
+      margin: 10px 0;
+      overflow: hidden;
+      box-shadow: var(--card-shadow);
+      border: 1px solid var(--gray);
+      transition: var(--transition);
+    }
+    
+    body.dark-mode .list-card {
+      background: var(--dark-light);
+      border: 1px solid var(--dark-gray);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    }
+    
+    .list-title {
+      padding: 12px 16px;
+      background: var(--accent-gradient);
+      color: white;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    
+    .list-item {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--gray);
+      font-size: 14px;
+      transition: var(--transition);
+    }
+    
+    body.dark-mode .list-item {
+      border-bottom: 1px solid var(--dark-gray);
+      color: var(--dark-text);
+    }
+    
+    .list-item:last-child {
+      border-bottom: none;
+    }
+    
+    .typing-indicator {
+      display: flex;
+      padding: 12px 20px;
+      background: var(--light);
+      border-radius: 22px;
+      width: fit-content;
+      margin-bottom: 20px;
+      position: relative;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+      animation: slideInFromBottom 0.4s ease-out;
+      clear: both;
+      float: left;
+      border-bottom-left-radius: 6px;
+      border-left: 3px solid rgba(0, 210, 255, 0.4);
+      transition: var(--transition);
+    }
+    
+    body.dark-mode .typing-indicator {
+      background: var(--dark-light);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+      border-left: 3px solid rgba(0, 180, 220, 0.4);
+    }
+    
+    @keyframes slideInFromBottom {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .typing-indicator::before {
+      content: 'AI thinking';
+      position: absolute;
+      top: -20px;
+      left: 12px;
+      font-size: 11px;
+      color: var(--text-light);
+      background: var(--accent-gradient);
+      color: white;
+      padding: 3px 8px;
+      border-radius: 10px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      box-shadow: 0 4px 10px rgba(0, 210, 255, 0.3);
+      backdrop-filter: blur(4px);
+    }
+    
+    .typing-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--primary);
+      border-radius: 50%;
+      margin: 0 3px;
+      display: inline-block;
+      animation: typingDot 1.4s infinite ease-in-out both;
+    }
+    
+    body.dark-mode .typing-dot {
+      background: var(--dark-primary);
+    }
+    
+    .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+    .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+    
+    @keyframes typingDot {
+      0%, 80%, 100% { transform: scale(0.7); opacity: 0.6; }
+      40% { transform: scale(1); opacity: 1; }
+    }
+    
+    .chat-input-container {
+      padding: 12px 20px 20px 20px;
+      background: white;
+      border-top: 1px solid var(--gray);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      z-index: 5;
+      transition: var(--transition);
+    }
+    
+    body.dark-mode .chat-input-container {
+      background: var(--dark-card);
+      border-top: 1px solid var(--dark-gray);
+    }
+    
+    .input-suggestions-container {
+      padding: 8px 0;
+      display: flex;
+      overflow-x: auto;
+      overflow-y: hidden;
+      gap: 8px;
+      transition: opacity 0.25s ease-out, max-height 0.3s ease-out;
+      max-height: 45px;
+      opacity: 1;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      scroll-behavior: smooth;
+    }
+    
+    .input-suggestions-container::-webkit-scrollbar {
+      display: none;
+    }
+    
+    .input-suggestions-container.hidden {
+      opacity: 0;
+      max-height: 0;
+      padding: 0;
+    }
+    
+    .suggestion-chip {
+      background: rgba(123, 104, 238, 0.06);
+      border: 1px solid rgba(123, 104, 238, 0.2);
+      color: var(--primary);
+      font-size: 13px;
+      padding: 5px 12px;
+      border-radius: 100px;
+      white-space: nowrap;
+      cursor: pointer;
+      pointer-events: auto;
+      transition: var(--fast-transition);
+      animation: fadeIn 0.4s ease-out forwards;
+      flex-shrink: 0;
+    }
+    
+    body.dark-mode .suggestion-chip {
+      background: rgba(99, 85, 199, 0.1);
+      border: 1px solid rgba(99, 85, 199, 0.25);
+      color: var(--secondary);
+    }
+    
+    .suggestion-chip.active {
+      background: rgba(123, 104, 238, 0.15);
+      border-color: rgba(123, 104, 238, 0.4);
+      transform: translateY(-2px);
+      box-shadow: 0 2px 5px rgba(123, 104, 238, 0.2);
+    }
+    
+    body.dark-mode .suggestion-chip.active {
+      background: rgba(99, 85, 199, 0.2);
+      border-color: rgba(99, 85, 199, 0.5);
+      box-shadow: 0 2px 5px rgba(99, 85, 199, 0.3);
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .suggestion-chip:nth-child(2) { animation-delay: 0.05s; }
+    .suggestion-chip:nth-child(3) { animation-delay: 0.1s; }
+    .suggestion-chip:nth-child(4) { animation-delay: 0.15s; }
+    .suggestion-chip:nth-child(5) { animation-delay: 0.2s; }
+    
+    .suggestion-chip:hover {
+      background: rgba(123, 104, 238, 0.1);
+      border-color: rgba(123, 104, 238, 0.4);
+      transform: translateY(-2px);
+    }
+    
+    body.dark-mode .suggestion-chip:hover {
+      background: rgba(99, 85, 199, 0.15);
+      border-color: rgba(99, 85, 199, 0.5);
+    }
+    
+    .input-row {
+      display: flex;
+      align-items: center;
+      position: relative;
+    }
+    
+    .chat-tools {
+      display: flex;
+      margin-right: 12px;
+    }
+    
+    .tool-button {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: var(--text-light);
+      cursor: pointer;
+      transition: var(--transition);
+      background: var(--light);
+      margin-right: 10px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+    }
+    
+    body.dark-mode .tool-button {
+      background: var(--dark-light);
+      color: var(--dark-text-light);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .tool-button:hover {
+      background: var(--gray);
+      color: var(--primary);
+      transform: translateY(-2px);
+    }
+    
+    body.dark-mode .tool-button:hover {
+      background: var(--dark-gray);
+      color: var(--secondary);
+    }
+    
+    .voice-button {
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .voice-button.recording {
+      background: linear-gradient(to right, #ff5858, #f09819);
+      color: white;
+      animation: pulse-recording 1.5s infinite;
+    }
+    
+    @keyframes pulse-recording {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+    
+    .voice-button.recording .wave {
+      opacity: 1;
+    }
+    
+    .wave {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 80px;
+      height: 80px;
+      margin-left: -40px;
+      margin-top: -40px;
+      background: rgba(255, 255, 255, 0.2);
+      opacity: 0;
+      border-radius: 50%;
+      animation: wave 1.5s infinite;
+      pointer-events: none;
+    }
+    
+    @keyframes wave {
+      from { transform: scale(0); opacity: 1; }
+      to { transform: scale(1); opacity: 0; }
+    }
+    
+    .chat-input-wrapper {
+      flex: 1;
+      background: var(--light);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      padding: 0 6px 0 20px;
+      transition: var(--transition);
+      border: 2px solid transparent;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+      position: relative;
+    }
+    
+    body.dark-mode .chat-input-wrapper {
+      background: var(--dark-light);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .chat-input-wrapper:focus-within {
+      box-shadow: 0 0 0 3px rgba(123, 104, 238, 0.2);
+      background: white;
+      border-color: var(--primary);
+    }
+    
+    body.dark-mode .chat-input-wrapper:focus-within {
+      box-shadow: 0 0 0 3px rgba(99, 85, 199, 0.2);
+      background: var(--dark-card);
+      border-color: var(--dark-primary);
+    }
+    
+    .chat-input {
+      flex: 1;
+      border: none;
+      outline: none;
+      background: transparent;
+      padding: 14px 0;
+      font-size: 15px;
+      color: var(--text);
+      transition: var(--transition);
+    }
+    
+    body.dark-mode .chat-input {
+      color: var(--dark-text);
+    }
+    
+    .chat-input::placeholder {
+      color: var(--text-light);
+      transition: var(--transition);
+    }
+    
+    body.dark-mode .chat-input::placeholder {
+      color: var(--dark-text-light);
+    }
+    
+    .send-button {
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
+      background: var(--primary-gradient);
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      transition: var(--transition);
+      border: none;
+      outline: none;
+      box-shadow: 0 6px 16px rgba(123, 104, 238, 0.3);
+      margin-left: 10px;
+    }
+    
+    body.dark-mode .send-button {
+      background: var(--dark-primary-gradient);
+      box-shadow: 0 6px 16px rgba(99, 85, 199, 0.3);
+    }
+    
+    .send-button:hover {
+      transform: scale(1.05) translateY(-2px);
+      box-shadow: 0 8px 20px rgba(123, 104, 238, 0.4);
+    }
+    
+    body.dark-mode .send-button:hover {
+      box-shadow: 0 8px 20px rgba(99, 85, 199, 0.4);
+    }
+    
+    .send-button:active {
+      transform: scale(0.95);
+    }
+    
+    /* Emoji suggestion styles */
+    .emoji-suggestions {
+      position: absolute;
+      top: -50px;
+      left: 20px;
+      background: white;
+      border-radius: 14px;
+      padding: 5px;
+      display: flex;
+      gap: 8px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      border: 1px solid var(--gray);
+      animation: popIn 0.3s cubic-bezier(0.215, 0.61, 0.355, 1);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+      z-index: 100;
+    }
+    
+    body.dark-mode .emoji-suggestions {
+      background: var(--dark-card);
+      border: 1px solid var(--dark-gray);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .emoji-suggestions.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    
+    @keyframes popIn {
+      from { transform: translateY(5px) scale(0.95); opacity: 0; }
+      to { transform: translateY(0) scale(1); opacity: 1; }
+    }
+    
+    .emoji-option {
+      font-size: 22px;
+      width: 38px;
+      height: 38px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      border-radius: 10px;
+      transition: all 0.2s ease;
+      background: var(--light);
+    }
+    
+    body.dark-mode .emoji-option {
+      background: var(--dark-light);
+    }
+    
+    .emoji-option:hover {
+      background: var(--gray);
+      transform: scale(1.1);
+    }
+    
+    body.dark-mode .emoji-option:hover {
+      background: var(--dark-gray);
+    }
+    
+    .emoji-option.active {
+      background: var(--primary);
+      color: white;
+    }
+    
+    body.dark-mode .emoji-option.active {
+      background: var(--dark-primary);
+    }
+    
+    /* Moving emoji animation */
+    .moving-emoji {
+      position: absolute;
+      z-index: 1000;
+      font-size: 22px;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s cubic-bezier(0.22, 0.61, 0.36, 1);
+    }
+    
+    /* Emoji panel styles */
+    .emoji-panel {
+      position: absolute;
+      bottom: 90px;
+      left: 20px;
+      right: 20px;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      max-height: 0;
+      overflow: hidden;
+      opacity: 0;
+      transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+    }
+    
+    body.dark-mode .emoji-panel {
+      background: var(--dark-card);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+    }
+    
+    .emoji-panel.active {
+      max-height: 320px;
+      opacity: 1;
+    }
+    
+    .emoji-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--gray);
+      padding: 10px 15px;
+      transition: var(--transition);
+    }
+    
+    body.dark-mode .emoji-tabs {
+      border-bottom: 1px solid var(--dark-gray);
+    }
+    
+    .emoji-tab {
+      padding: 8px 12px;
+      border-radius: 100px;
+      cursor: pointer;
+      margin-right: 8px;
+      font-size: 14px;
+      transition: all 0.2s ease;
+      background: transparent;
+      color: var(--text);
+    }
+    
+    body.dark-mode .emoji-tab {
+      color: var(--dark-text);
+    }
+    
+    .emoji-tab:hover {
+      background: var(--light);
+    }
+    
+    body.dark-mode .emoji-tab:hover {
+      background: var(--dark-light);
+    }
+    
+    .emoji-tab.active {
+      background: var(--primary);
+      color: white;
+    }
+    
+    body.dark-mode .emoji-tab.active {
+      background: var(--dark-primary);
+    }
+    
+    .emoji-content {
+      padding: 15px;
+      overflow-y: auto;
+      max-height: 260px;
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+    }
+    
+    .emoji-item {
+      font-size: 24px;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+    }
+    
+    .emoji-item:hover {
+      background: var(--light);
+      transform: scale(1.1);
+    }
+    
+    body.dark-mode .emoji-item:hover {
+      background: var(--dark-light);
+    }
+    
+    .chat-decoration {
+      position: absolute;
+      background: linear-gradient(135deg, var(--primary) 0%, transparent 60%);
+      opacity: 0.03;
+      border-radius: 50%;
+      z-index: 0;
+      transition: var(--transition);
+    }
+    
+    body.dark-mode .chat-decoration {
+      background: linear-gradient(135deg, var(--dark-primary) 0%, transparent 60%);
+      opacity: 0.05;
+    }
+    
+    .decoration-1 {
+      width: 400px;
+      height: 400px;
+      top: -200px;
+      right: -200px;
+    }
+    
+    .decoration-2 {
+      width: 300px;
+      height: 300px;
+      bottom: -100px;
+      left: -100px;
+      background: linear-gradient(135deg, var(--accent) 0%, transparent 60%);
+      transition: var(--transition);
+    }
+    
+    body.dark-mode .decoration-2 {
+      background: linear-gradient(135deg, #0085b3 0%, transparent 60%);
+    }
+    
+    .decoration-3 {
+      width: 200px;
+      height: 200px;
+      top: 40%;
+      left: -100px;
+      background: radial-gradient(circle, var(--primary) 0%, transparent 70%);
+      transition: var(--transition);
+    }
+    
+    body.dark-mode .decoration-3 {
+      background: radial-gradient(circle, var(--dark-primary) 0%, transparent 70%);
+    }
+    
+    /* Moving suggestion animation */
+    .moving-suggestion {
+      position: absolute;
+      z-index: 1000;
+      background: rgba(123, 104, 238, 0.06);
+      border: 1px solid rgba(123, 104, 238, 0.2);
+      color: var(--primary);
+      font-size: 15px;
+      padding: 5px 12px;
+      border-radius: 100px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s cubic-bezier(0.22, 0.61, 0.36, 1);
+      text-align: left;
+    }
+    
+    body.dark-mode .moving-suggestion {
+      background: rgba(99, 85, 199, 0.1);
+      border: 1px solid rgba(99, 85, 199, 0.25);
+      color: var(--secondary);
+    }
+    
+    /* Card styling for routine plans */
+    .routine-card {
+      background: white;
+      border-radius: 16px;
+      padding: 0;
+      margin: 10px 0;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      border: 1px solid var(--gray);
+      transition: var(--transition);
+    }
+    
+    body.dark-mode .routine-card {
+      background: var(--dark-light);
+      border: 1px solid var(--dark-gray);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .routine-header {
+      background: var(--accent-gradient);
+      color: white;
+      padding: 12px 15px;
+      font-weight: 600;
+      font-size: 15px;
+    }
+    
+    .routine-item {
+      padding: 12px 15px;
+      border-bottom: 1px solid var(--gray);
+      display: flex;
+    }
+    
+    body.dark-mode .routine-item {
+      border-bottom: 1px solid var(--dark-gray);
+      color: var(--dark-text);
+    }
+    
+    .routine-time {
+      font-weight: 600;
+      color: var(--primary);
+      margin-right: 12px;
+      min-width: 60px;
+    }
+    
+    body.dark-mode .routine-time {
+      color: var(--secondary);
+    }
+    
+    .routine-description {
+      flex: 1;
+      font-size: 14px;
+    }
+    
+    .routine-item:last-child {
+      border-bottom: none;
+    }
+    
+    /* Styles for food and activity suggestions */
+    .suggestion-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin: 10px 0;
+    }
+    
+    .suggestion-item {
+      background: var(--light);
+      border-radius: 12px;
+      padding: 12px;
+      font-size: 14px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+      transition: var(--transition);
+    }
+    
+    body.dark-mode .suggestion-item {
+      background: var(--dark-light);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      color: var(--dark-text);
+    }
+    
+    .suggestion-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+    
+    body.dark-mode .suggestion-item:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .suggestion-emoji {
+      font-size: 20px;
+      margin-bottom: 6px;
+    }
+    
+    .suggestion-title {
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: var(--text);
+      transition: var(--transition);
+    }
+    
+    body.dark-mode .suggestion-title {
+      color: var(--dark-text);
+    }
+    
+    .suggestion-desc {
+      color: var(--text-light);
+      font-size: 13px;
+      line-height: 1.4;
+      transition: var(--transition);
+    }
+    
+    body.dark-mode .suggestion-desc {
+      color: var(--dark-text-light);
+    }
+    
+    /* Message options */
+    .message-options {
+      position: absolute;
+      right: -30px;
+      top: 50%;
+      transform: translateY(-50%);
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    
+    .message-incoming .message-options {
+      right: auto;
+      left: -30px;
+    }
+    
+    .message:hover .message-options {
+      opacity: 1;
+    }
+    
+    .message-option-btn {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      color: var(--text-light);
+    }
+    
+    body.dark-mode .message-option-btn {
+      background: var(--dark-light);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      color: var(--dark-text-light);
+    }
+    
+    .message-option-btn:hover {
+      transform: scale(1.1);
+      background: var(--primary);
+      color: white;
+    }
+    
+    body.dark-mode .message-option-btn:hover {
+      background: var(--dark-primary);
+    }
+    
+    /* Voice recording feedback */
+    .voice-feedback {
+      position: absolute;
+      width: 100%;
+      height: 60px;
+      bottom: -60px;
+      left: 0;
+      background: var(--accent-gradient);
+      color: white;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom-left-radius: var(--border-radius);
+      border-bottom-right-radius: var(--border-radius);
+      transform: translateY(0);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 4;
+      box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .voice-feedback.active {
+      transform: translateY(-60px);
+    }
+    
+    .voice-feedback-text {
+      font-size: 14px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+    }
+    
+    .voice-feedback-text svg {
+      margin-right: 10px;
+      animation: pulse-recording 1.5s infinite;
+    }
+    
+    .voice-feedback-actions {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .voice-action-btn {
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      border-radius: 10px;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 600;
+      color: white;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .voice-action-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+    
+    .voice-action-btn.cancel {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    
+    /* Reactions container */
+    .add-reaction-container {
+      position: absolute;
+      bottom: 110%;
+      background: white;
+      border-radius: 12px;
+      padding: 6px;
+      display: flex;
+      gap: 4px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      border: 1px solid var(--gray);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(5px);
+      transition: all 0.2s ease;
+      z-index: 100;
+    }
+    
+    body.dark-mode .add-reaction-container {
+      background: var(--dark-light);
+      border: 1px solid var(--dark-gray);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .add-reaction-container.show {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+    
+    .message-outgoing .add-reaction-container {
+      right: 0;
+    }
+    
+    .message-incoming .add-reaction-container {
+      left: 0;
+    }
+    
+    .reaction-button {
+      font-size: 16px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: var(--light);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    body.dark-mode .reaction-button {
+      background: var(--dark-gray);
+    }
+    
+    .reaction-button:hover {
+      transform: scale(1.15);
+      background: var(--gray);
+    }
+    
+    body.dark-mode .reaction-button:hover {
+      background: rgba(50, 50, 74, 1);
+    }
+    
+    /* Search */
+    .search-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      background: white;
+      z-index: 99;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      transform: translateY(-100%);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    body.dark-mode .search-container {
+      background: var(--dark-card);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .search-container.active {
+      transform: translateY(0);
+    }
+    
+    .search-input {
+      flex: 1;
+      border: none;
+      outline: none;
+      background: var(--light);
+      padding: 10px 15px;
+      border-radius: 12px;
+      font-size: 14px;
+      color: var(--text);
+      transition: var(--transition);
+    }
+    
+    body.dark-mode .search-input {
+      background: var(--dark-light);
+      color: var(--dark-text);
+    }
+    
+    .search-input:focus {
+      box-shadow: 0 0 0 2px rgba(123, 104, 238, 0.2);
+    }
+    
+    body.dark-mode .search-input:focus {
+      box-shadow: 0 0 0 2px rgba(99, 85, 199, 0.2);
+    }
+    
+    .search-close {
+      margin-left: 10px;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: var(--light);
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      color: var(--text-light);
+    }
+    
+    body.dark-mode .search-close {
+      background: var(--dark-light);
+      color: var(--dark-text-light);
+    }
+    
+    .search-close:hover {
+      background: var(--gray);
+      color: var(--text);
+    }
+    
+    body.dark-mode .search-close:hover {
+      background: var(--dark-gray);
+      color: var(--dark-text);
+    }
+    
+    /* Settings panel */
+    .settings-panel {
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 300px;
+      background: white;
+      z-index: 100;
+      box-shadow: -5px 0 20px rgba(0, 0, 0, 0.1);
+      transform: translateX(100%);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      flex-direction: column;
+      border-top-left-radius: var(--border-radius);
+      border-bottom-left-radius: var(--border-radius);
+      overflow: hidden;
+    }
+    
+    body.dark-mode .settings-panel {
+      background: var(--dark-card);
+      box-shadow: -5px 0 20px rgba(0, 0, 0, 0.25);
+    }
+    
+    .settings-panel.active {
+      transform: translateX(0);
+    }
+    
+    .settings-header {
+      padding: 20px 20px 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--gray);
+      transition: var(--transition);
+    }
+    
+    body.dark-mode .settings-header {
+      border-bottom: 1px solid var(--dark-gray);
+    }
+    
+    .settings-title {
+      font-weight: 700;
+      font-size: 18px;
+      color: var(--text);
+      transition: var(--transition);
+    }
+    
+    body.dark-mode .settings-title {
+      color: var(--dark-text);
+    }
+    
+    .settings-close {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: var(--light);
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      color: var(--text-light);
+    }
+    
+    body.dark-mode .settings-close {
+      background: var(--dark-light);
+      color: var(--dark-text-light);
+    }
+    
+    .settings-close:hover {
+      background: var(--gray);
+      color: var(--text);
+    }
+    
+    body.dark-mode .settings-close:hover {
+      background: var(--dark-gray);
+      color: var(--dark-text);
+    }
+    
+    .settings-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+    }
+    
+    .settings-section {
+      margin-bottom: 24px;
+    }
+    
+    .settings-section-title {
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--text);
+      margin-bottom: 10px;
+      transition: var(--transition);
+    }
+    
+    body.dark-mode .settings-section-title {
+      color: var(--dark-text);
+    }
+    
+    .settings-option {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 15px;
+      background: var(--light);
+      border-radius: 12px;
+      margin-bottom: 8px;
+      transition: var(--transition);
+    }
+    
+    body.dark-mode .settings-option {
+      background: var(--dark-light);
+    }
+    
+    .option-label {
+      font-size: 14px;
+      color: var(--text);
+      transition: var(--transition);
+    }
+    
+    body.dark-mode .option-label {
+      color: var(--dark-text);
+    }
+    
+    .option-toggle {
+      position: relative;
+      width: 50px;
+      height: 28px;
+      background: var(--gray);
+      border-radius: 14px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    
+    body.dark-mode .option-toggle {
+      background: var(--dark-gray);
+    }
+    
+    .option-toggle.active {
+      background: var(--primary);
+    }
+    
+    body.dark-mode .option-toggle.active {
+      background: var(--dark-primary);
+    }
+    
+    .toggle-handle {
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 22px;
+      height: 22px;
+      background: white;
+      border-radius: 50%;
+      transition: transform 0.3s;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .option-toggle.active .toggle-handle {
+      transform: translateX(22px);
+    }
+    
+    /* Theme selection */
+    .theme-options {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    
+    .theme-option {
+      flex: 1;
+      height: 60px;
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    
+    .theme-option:hover {
+      transform: translateY(-2px);
+    }
+    
+    .theme-option.active {
+      box-shadow: 0 0 0 2px var(--primary);
+    }
+    
+    body.dark-mode .theme-option.active {
+      box-shadow: 0 0 0 2px var(--dark-primary);
+    }
+    
+    .theme-preview {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .theme-header {
+      height: 20px;
+      background: var(--primary-gradient);
+    }
+    
+    .theme-dark .theme-header {
+      background: var(--dark-primary-gradient);
+    }
+    
+    .theme-body {
+      height: 40px;
+      background: white;
+      display: flex;
+      padding: 5px;
+      align-items: center;
+    }
+    
+    .theme-dark .theme-body {
+      background: var(--dark-card);
+    }
+    
+    .theme-message {
+      height: 12px;
+      width: 60%;
+      background: var(--light);
+      border-radius: 6px;
+    }
+    
+    .theme-dark .theme-message {
+      background: var(--dark-light);
+    }
+    
+    .theme-label {
+      font-size: 12px;
+      text-align: center;
+      margin-top: 5px;
+      font-weight: 500;
+      color: var(--text);
+      transition: var(--transition);
+    }
+    
+    body.dark-mode .theme-label {
+      color: var(--dark-text);
+    }
+    
+    /* Animation settings */
+    .animation-slider {
+      width: 100%;
+      height: 6px;
+      background: var(--gray);
+      border-radius: 3px;
+      position: relative;
+      cursor: pointer;
+      margin: 10px 0;
+      transition: var(--transition);
+    }
+    
+    body.dark-mode .animation-slider {
+      background: var(--dark-gray);
+    }
+    
+    .slider-fill {
+      position: absolute;
+      height: 100%;
+      width: 50%;
+      background: var(--primary);
+      border-radius: 3px;
+      transition: var(--transition);
+    }
+    
+    body.dark-mode .slider-fill {
+      background: var(--dark-primary);
+    }
+    
+    .slider-handle {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 18px;
+      height: 18px;
+      background: white;
+      border: 2px solid var(--primary);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      cursor: pointer;
+      transition: var(--transition);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    
+    body.dark-mode .slider-handle {
+      background: var(--dark-card);
+      border: 2px solid var(--dark-primary);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+    
+    .slider-handle:hover {
+      transform: translate(-50%, -50%) scale(1.1);
+    }
+    
+    .slider-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-light);
+      margin-top: 5px;
+      transition: var(--transition);
+    }
+    
+    body.dark-mode .slider-labels {
+      color: var(--dark-text-light);
+    }
+    
+    /* Font size setting */
+    .font-size-options {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 10px 0;
+    }
+    
+    .font-size-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: var(--light);
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-weight: 600;
+    }
+    
+    body.dark-mode .font-size-btn {
+      background: var(--dark-light);
+      color: var(--dark-text);
+    }
+    
+    .font-size-btn:hover {
+      background: var(--gray);
+    }
+    
+    body.dark-mode .font-size-btn:hover {
+      background: var(--dark-gray);
+    }
+    
+    .font-size-preview {
+      flex: 1;
+      padding: 10px 15px;
+      background: var(--light);
+      border-radius: 10px;
+      font-size: 15px;
+      color: var(--text);
+      text-align: center;
+      transition: var(--transition);
+    }
+    
+    body.dark-mode .font-size-preview {
+      background: var(--dark-light);
+      color: var(--dark-text);
+    }
+    
+    /* Help shortcut section */
+    .help-shortcuts {
+      margin-top: 10px;
+    }
+    
+    .shortcut-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 13px;
+      transition: var(--transition);
+    }
+    
+    .shortcut-keys {
+      display: flex;
+      gap: 5px;
+    }
+    
+    .key {
+      background: var(--light);
+      color: var(--text);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      border: 1px solid var(--gray);
+      transition: var(--transition);
+    }
+    
+    body.dark-mode .key {
+      background: var(--dark-light);
+      color: var(--dark-text);
+      border: 1px solid var(--dark-gray);
+    }
+    
+    .shortcut-action {
+      color: var(--text-light);
+      transition: var(--transition);
+    }
+    
+    body.dark-mode .shortcut-action {
+      color: var(--dark-text-light);
+    }
+    
+    /* Toast notifications */
+    .toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 300px;
+      pointer-events: none;
+    }
+    
+    .toast {
+      background: white;
+      border-radius: 12px;
+      padding: 15px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      animation: toastSlide 0.3s forwards;
+      position: relative;
+      overflow: hidden;
+      pointer-events: auto;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    
+    body.dark-mode .toast {
+      background: var(--dark-card);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.25);
+    }
+    
+    @keyframes toastSlide {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    
+    .toast-closing {
+      animation: toastSlideOut 0.3s forwards;
+    }
+    
+    @keyframes toastSlideOut {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(100%); opacity: 0; }
+    }
+    
+    .toast-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--primary-gradient);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      flex-shrink: 0;
+    }
+    
+    .toast-success .toast-icon {
+      background: linear-gradient(135deg, #4ded6e 0%, #23c73a 100%);
+    }
+    
+    .toast-error .toast-icon {
+      background: linear-gradient(135deg, #ff6b6b 0%, #cc3d3d 100%);
+    }
+    
+    .toast-content {
+      flex: 1;
+    }
+    
+    .toast-title {
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 2px;
+      color: var(--text);
+      transition: var(--transition);
+    }
+    
+    body.dark-mode .toast-title {
+      color: var(--dark-text);
+    }
+    
+    .toast-message {
+      font-size: 12px;
+      color: var(--text-light);
+      transition: var(--transition);
+    }
+    
+    body.dark-mode .toast-message {
+      color: var(--dark-text-light);
+    }
+    
+    .toast-progress {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 3px;
+      background: var(--primary);
+      animation: toastProgress 5s linear forwards;
+    }
+    
+    @keyframes toastProgress {
+      from { width: 100%; }
+      to { width: 0%; }
+    }
+    
+    /* Keyboard focus indicators */
+    a:focus-visible,
+    button:focus-visible,
+    input:focus-visible,
+    .tool-button:focus-visible,
+    .emoji-tab:focus-visible,
+    .emoji-item:focus-visible,
+    .settings-option:focus-visible {
+      outline: 2px solid var(--primary);
+      outline-offset: 2px;
+    }
+    
+    body.dark-mode a:focus-visible,
+    body.dark-mode button:focus-visible,
+    body.dark-mode input:focus-visible,
+    body.dark-mode .tool-button:focus-visible,
+    body.dark-mode .emoji-tab:focus-visible,
+    body.dark-mode .emoji-item:focus-visible,
+    body.dark-mode .settings-option:focus-visible {
+      outline: 2px solid var(--dark-primary);
+    }
+    
+    /* Responsiveness */
+    @media (max-width: 480px) {
+      .chat-container {
+        max-width: 100%;
+        height: 100vh;
+        border-radius: 0;
+      }
+      
+      .chat-tools {
+        margin-right: 8px;
+      }
+      
+      .tool-button {
+        width: 36px;
+        height: 36px;
+        margin-right: 5px;
+      }
+      
+      .send-button {
+        width: 40px;
+        height: 40px;
+      }
+      
+      .chat-input-wrapper {
+        padding-left: 15px;
+      }
+      
+      .chat-header {
+        padding: 12px 20px;
+      }
+      
+      .header-avatar {
+        width: 36px;
+        height: 36px;
+      }
+      
+      .settings-panel {
+        width: 280px;
+      }
+    }
+    
+    /* Hidden accessibility elements */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border-width: 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-container">
+    <div class="chat-decoration decoration-1"></div>
+    <div class="chat-decoration decoration-2"></div>
+    <div class="chat-decoration decoration-3"></div>
+    
+    <!-- Search bar -->
+    <div class="search-container" id="search-container">
+      <input type="text" class="search-input" id="search-input" placeholder="Search conversation..." aria-label="Search conversation">
+      <div class="search-close" id="search-close" aria-label="Close search">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </div>
+    </div>
+    
+    <div class="chat-header">
+      <div class="header-avatar">
+        <div class="avatar-icon">AI</div>
+      </div>
+      <div class="user-info">
+        <div class="user-name">Nexus Assistant</div>
+        <div class="user-status"><span class="status-dot"></span>Ready to assist</div>
+      </div>
+      <div class="header-actions">
+        <div class="header-icon" id="search-button" aria-label="Search conversation">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+        </div>
+        <div class="header-icon theme-toggle" id="theme-toggle" aria-label="Toggle dark mode">
+          <div class="theme-icon-light">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="5"></circle>
+              <line x1="12" y1="1" x2="12" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="23"></line>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+              <line x1="1" y1="12" x2="3" y2="12"></line>
+              <line x1="21" y1="12" x2="23" y2="12"></line>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+          </div>
+          <div class="theme-icon-dark">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="header-icon" id="settings-button" aria-label="Settings">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+        </div>
+      </div>
+    </div>
+    
+    <div class="chat-messages" id="chat-messages">
+      <!-- Messages will be added here -->
+    </div>
+    
+    <!-- Settings panel -->
+    <div class="settings-panel" id="settings-panel">
+      <div class="settings-header">
+        <div class="settings-title">Settings</div>
+        <div class="settings-close" id="settings-close" aria-label="Close settings">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </div>
+      </div>
+      <div class="settings-content">
+        <div class="settings-section">
+          <div class="settings-section-title">Theme</div>
+          <div class="theme-options">
+            <div class="theme-option theme-light active" data-theme="light">
+              <div class="theme-preview">
+                <div class="theme-header"></div>
+                <div class="theme-body">
+                  <div class="theme-message"></div>
+                </div>
+              </div>
+              <div class="theme-label">Light</div>
+            </div>
+            <div class="theme-option theme-dark" data-theme="dark">
+              <div class="theme-preview">
+                <div class="theme-header"></div>
+                <div class="theme-body">
+                  <div class="theme-message"></div>
+                </div>
+              </div>
+              <div class="theme-label">Dark</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="settings-section">
+          <div class="settings-section-title">Interface</div>
+          <div class="settings-option">
+            <div class="option-label">Enable sound effects</div>
+            <div class="option-toggle" id="sound-toggle">
+              <div class="toggle-handle"></div>
+            </div>
+          </div>
+          <div class="settings-option">
+            <div class="option-label">Show typing indicators</div>
+            <div class="option-toggle active" id="typing-toggle">
+              <div class="toggle-handle"></div>
+            </div>
+          </div>
+          <div class="settings-option">
+            <div class="option-label">Enable animations</div>
+            <div class="option-toggle active" id="animations-toggle">
+              <div class="toggle-handle"></div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="settings-section">
+          <div class="settings-section-title">Animation Speed</div>
+          <div class="animation-slider" id="animation-slider">
+            <div class="slider-fill"></div>
+            <div class="slider-handle"></div>
+          </div>
+          <div class="slider-labels">
+            <span>Slower</span>
+            <span>Faster</span>
+          </div>
+        </div>
+        
+        <div class="settings-section">
+          <div class="settings-section-title">Font Size</div>
+          <div class="font-size-options">
+            <div class="font-size-btn" id="font-decrease">A-</div>
+            <div class="font-size-preview" id="font-preview">Default Text Size</div>
+            <div class="font-size-btn" id="font-increase">A+</div>
+          </div>
+        </div>
+        
+        <div class="settings-section">
+          <div class="settings-section-title">Keyboard Shortcuts</div>
+          <div class="help-shortcuts">
+            <div class="shortcut-item">
+              <div class="shortcut-keys">
+                <span class="key">Ctrl</span>
+                <span class="key">F</span>
+              </div>
+              <div class="shortcut-action">Search conversation</div>
+            </div>
+            <div class="shortcut-item">
+              <div class="shortcut-keys">
+                <span class="key">Ctrl</span>
+                <span class="key">D</span>
+              </div>
+              <div class="shortcut-action">Toggle dark mode</div>
+            </div>
+            <div class="shortcut-item">
+              <div class="shortcut-keys">
+                <span class="key">Ctrl</span>
+                <span class="key">S</span>
+              </div>
+              <div class="shortcut-action">Open settings</div>
+            </div>
+            <div class="shortcut-item">
+              <div class="shortcut-keys">
+                <span class="key">Esc</span>
+              </div>
+              <div class="shortcut-action">Close panels</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Emoji panel with categories -->
+    <div class="emoji-panel" id="emoji-panel">
+      <div class="emoji-tabs" id="emoji-tabs">
+        <div class="emoji-tab active" data-category="happy">Happy</div>
+        <div class="emoji-tab" data-category="sad">Sad</div>
+        <div class="emoji-tab" data-category="love">Love</div>
+        <div class="emoji-tab" data-category="angry">Angry</div>
+        <div class="emoji-tab" data-category="objects">Objects</div>
+        <div class="emoji-tab" data-category="all">All</div>
+      </div>
+      <div class="emoji-content" id="emoji-content">
+        <!-- Emojis will be added here dynamically -->
+      </div>
+    </div>
+    
+    <div class="chat-input-container">
+      <!-- Suggestions row above the input field -->
+      <div class="input-suggestions-container" id="input-suggestions-container">
+        <div class="suggestion-chip">How do I create a meal plan?</div>
+        <div class="suggestion-chip">Morning routine ideas</div>
+        <div class="suggestion-chip">Productivity tips</div>
+        <div class="suggestion-chip">Best exercises for beginners</div>
+        <div class="suggestion-chip">Recommend healthy snacks</div>
+      </div>
+      
+      <!-- Input row with tools and send button -->
+      <div class="input-row">
+        <div class="chat-tools">
+          <div class="tool-button" id="emoji-button" aria-label="Add emoji">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
+              <line x1="9" y1="9" x2="9.01" y2="9"></line>
+              <line x1="15" y1="9" x2="15.01" y2="9"></line>
+            </svg>
+          </div>
+          <div class="tool-button voice-button" id="voice-button" aria-label="Voice input">
+            <div class="wave"></div>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+              <line x1="12" y1="19" x2="12" y2="23"></line>
+              <line x1="8" y1="23" x2="16" y2="23"></line>
+            </svg>
+          </div>
+        </div>
+        <div class="chat-input-wrapper">
+          <!-- Emoji suggestions popup -->
+          <div class="emoji-suggestions" id="emoji-suggestions"></div>
+          <input type="text" class="chat-input" id="message-input" placeholder="Type your message..." aria-label="Type your message">
+        </div>
+        <button class="send-button" id="send-button" aria-label="Send message">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+        </button>
+      </div>
+    </div>
+    
+    <!-- Voice feedback indicator -->
+    <div class="voice-feedback" id="voice-feedback">
+      <div class="voice-feedback-text">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+          <line x1="12" y1="19" x2="12" y2="23"></line>
+          <line x1="8" y1="23" x2="16" y2="23"></line>
+        </svg>
+        <span>Recording voice message...</span>
+      </div>
+      <div class="voice-feedback-actions">
+        <button class="voice-action-btn cancel" id="voice-cancel">Cancel</button>
+        <button class="voice-action-btn" id="voice-send">Send</button>
+      </div>
+    </div>
+    
+    <!-- Reaction container for messages -->
+    <div class="add-reaction-container" id="reaction-container">
+      <div class="reaction-button" data-emoji="👍">👍</div>
+      <div class="reaction-button" data-emoji="❤️">❤️</div>
+      <div class="reaction-button" data-emoji="😂">😂</div>
+      <div class="reaction-button" data-emoji="😮">😮</div>
+      <div class="reaction-button" data-emoji="👏">👏</div>
+      <div class="reaction-button" data-emoji="🙏">🙏</div>
+    </div>
+    
+    <!-- Toast notification container -->
+    <div class="toast-container" id="toast-container">
+      <!-- Toasts will be added here dynamically -->
+    </div>
+    
+    <!-- Element for animated suggestion -->
+    <div class="moving-suggestion" id="moving-suggestion"></div>
+    <!-- Element for animated emoji -->
+    <div class="moving-emoji" id="moving-emoji"></div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // DOM elements
+      const chatMessages = document.getElementById('chat-messages');
+      const messageInput = document.getElementById('message-input');
+      const sendButton = document.getElementById('send-button');
+      const emojiButton = document.getElementById('emoji-button');
+      const emojiPanel = document.getElementById('emoji-panel');
+      const emojiTabs = document.getElementById('emoji-tabs');
+      const emojiContent = document.getElementById('emoji-content');
+      const inputSuggestionsContainer = document.getElementById('input-suggestions-container');
+      const movingSuggestion = document.getElementById('moving-suggestion');
+      const movingEmoji = document.getElementById('moving-emoji');
+      const emojiSuggestions = document.getElementById('emoji-suggestions');
+      const suggestionChips = document.querySelectorAll('.suggestion-chip');
+      const voiceButton = document.getElementById('voice-button');
+      const voiceFeedback = document.getElementById('voice-feedback');
+      const voiceCancel = document.getElementById('voice-cancel');
+      const voiceSend = document.getElementById('voice-send');
+      const searchButton = document.getElementById('search-button');
+      const searchContainer = document.getElementById('search-container');
+      const searchInput = document.getElementById('search-input');
+      const searchClose = document.getElementById('search-close');
+      const themeToggle = document.getElementById('theme-toggle');
+      const settingsButton = document.getElementById('settings-button');
+      const settingsPanel = document.getElementById('settings-panel');
+      const settingsClose = document.getElementById('settings-close');
+      const soundToggle = document.getElementById('sound-toggle');
+      const typingToggle = document.getElementById('typing-toggle');
+      const animationsToggle = document.getElementById('animations-toggle');
+      const fontDecrease = document.getElementById('font-decrease');
+      const fontIncrease = document.getElementById('font-increase');
+      const fontPreview = document.getElementById('font-preview');
+      const themeOptions = document.querySelectorAll('.theme-option');
+      const reactionContainer = document.getElementById('reaction-container');
+      const toastContainer = document.getElementById('toast-container');
+      
+      // State variables
+      let isRecording = false;
+      let currentReactionMessage = null;
+      let activeToasts = [];
+      let toastIdCounter = 0;
+      let fontSizePercent = 100;
+      let isAnimationsEnabled = true;
+      let isSoundEnabled = false;
+      let isTypingEnabled = true;
+      let currentTheme = 'light';
+      let animationSpeed = 1;
+      
+      // Emoji categories
+      const emojiCategories = {
+        happy: ['😀', '😃', '😄', '😁', '😆', '😊', '🙂', '😉', '😍', '🥰', '😘', '🤩', '😎', '😋', '😇', '🥳', '😺', '😸', '😹', '😻'],
+        sad: ['😔', '😞', '😟', '😢', '😭', '😥', '😰', '😨', '😩', '😫', '🥺', '😣', '😖', '😓', '😿', '☹️', '🙁'],
+        love: ['❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '💕', '💞', '💓', '💗', '💖', '💘', '💝', '💟', '💌', '😍', '🥰'],
+        angry: ['😠', '😡', '🤬', '😤', '😾', '👿', '😈', '💢', '👊', '🔥', '💥', '⚡', '🤯', '💫', '🧠'],
+        objects: ['💻', '📱', '🖥️', '⌨️', '🖱️', '💿', '🔋', '🔌', '💡', '🔍', '🧮', '📷', '📹', '🎥', '📺', '📲', '☎️', '📞', '📟', '📠', '🔦', '🧰', '🛠️', '⚙️', '📚', '📓', '📒', '📝', '📋', '📄', '📑', '📊', '📈', '📉', '🗂️', '📁', '📂', '📰', '🗞️', '📮', '🏷️', '📭', '📬', '📪', '📫', '📦', '📇', '📌', '📍', '📎', '🖇️', '✂️', '🗃️', '🗄️', '🗑️', '🔒', '🔓', '🔏', '🔐']
+      };
+      
+      // Add 'all' category with all emojis
+      emojiCategories.all = [].concat(...Object.values(emojiCategories));
+      
+      // Emoji mappings for auto-suggestion
+      const emojiMap = {
+        'smile': ['😊', '😃', '😄', '😁'],
+        'sad': ['😢', '😔', '😞', '😥'],
+        'heart': ['❤️', '💗', '💓', '💖'],
+        'happy': ['😄', '😊', '🙂', '😀'],
+        'laugh': ['😂', '🤣', '😆', '😹'],
+        'love': ['❤️', '😍', '🥰', '💕'],
+        'angry': ['😠', '😡', '🤬', '😤'],
+        'cry': ['😢', '😭', '😿', '🥲'],
+        'think': ['🤔', '💭', '🧐', '🤨'],
+        'surprise': ['😮', '😲', '😯', '😱'],
+        'thumbs': ['👍', '👎', '👌', '🤙'],
+        'clap': ['👏', '🙌', '👐', '🤝'],
+        'fire': ['🔥', '💥', '✨', '⚡'],
+        'cool': ['😎', '🆒', '👓', '🕶️'],
+        'party': ['🎉', '🎊', '🎈', '🥳'],
+        'sleep': ['😴', '💤', '🛌', '🥱'],
+        'food': ['🍕', '🍔', '🍗', '🍲'],
+        'drink': ['🍺', '🍷', '🍹', '☕'],
+        'sick': ['🤒', '🤢', '🤮', '😷'],
+        'star': ['⭐', '🌟', '✨', '💫']
+      };
+      
+      // Sound effects
+      const sounds = {
+        send: new Audio("data:audio/mp3;base64,SUQzBAAAAAABEVRYWFgAAAAtAAADY29tbWVudABCaWdTb3VuZEJhbmsuY29tIC8gQ29uaGFQaXJhdGEuY29tAFRYWFgAAAASAAADTGF2ZjU4Ljc2LjEwMABUWFhYAAAASAAAAGJ1dHRvbiBwb3Agbm90aWZpY2F0aW9uIHNvdW5kLCBtb2Rlcm4gaW50ZXJmYWNlLCBmcmVzaCBwb3Agc291bmRUWFhYAAAAGgAAA1RpdGxlAFBvcCBOb3RpZmljYXRpb24AXGFMQU1FMy4xMDAgVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVU="),
+        message: new Audio("data:audio/mp3;base64,SUQzBAAAAAABEVRYWFgAAAAtAAADY29tbWVudABCaWdTb3VuZEJhbmsuY29tIC8gQ29uaGFQaXJhdGEuY29tAFRYWFgAAAASAAADTGF2ZjU4Ljc2LjEwMABUWFhYAAAASAAAAG1lc3NhZ2Ugbm90aWZpY2F0aW9uLCBpbmJveCwgZW1haWwsIHBvcCBzb3VuZCBlZmZlY3QsIGdlbmVyaWMgc291bmRUWFhYAAAAGgAAA1RpdGxlAE1lc3NhZ2UgTm90aWZpY2F0aW9uAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP/7kGQAD/AAAGkAAAAIAAANIAAAAQAAAaQAAAAgAAA0gAAABExBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVQ=="),
+        toggle: new Audio("data:audio/mp3;base64,SUQzBAAAAAABEVRYWFgAAAAtAAADY29tbWVudABCaWdTb3VuZEJhbmsuY29tIC8gQ29uaGFQaXJhdGEuY29tAFRYWFgAAAASAAADTGF2ZjU4Ljc2LjEwMABUWFhYAAAARwAAAHNtYWxsIHRvZ2dsZSBidXR0b24sIHN3aXRjaCBidXR0b24sIGJ1dHRvbiBzb3VuZCwgY2xpY2ssIGludGVyZmFjZVRYWFgAAAAaAAADVGl0bGUAVG9nZ2xlIFN3aXRjaCBTb3VuZAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP/7lGQAAAMoAF4FAACgJWALfQAABA0YXH3MiAEIsAx+uYEAJExBTUUzLjEwMC4xVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVQ=="),
+        notification: new Audio("data:audio/mp3;base64,SUQzBAAAAAABEVRYWFgAAAAtAAADY29tbWVudABCaWdTb3VuZEJhbmsuY29tIC8gQ29uaGFQaXJhdGEuY29tAFRYWFgAAAASAAADTGF2ZjU4Ljc2LjEwMABUWFhYAAAAVQAAAG5vdGlmaWNhdGlvbiBzb3VuZCwgYWxlcnQgc291bmQsIGJlbGwsIHNvZnQgc291bmQsIGdlbmVyaWMgbm90aWZpY2F0aW9uLCBtb2Rlcm4gc291bmRUWFhYAAAAGgAAA1RpdGxlAE5vdGlmaWNhdGlvbiBTb3VuZAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP/7lGQAAAM8AFJtAAAIXeAKvaAAARRsAW01gACCaYCt1rAAAExBTUUzLjEwMC4yAAAAAAAAAAAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVQ==")
+      };
+      
+      // Initialize emoji panel with the first category
+      populateEmojiPanel('happy');
+      
+      // Add date indicator
+      const dateDivider = document.createElement('div');
+      dateDivider.classList.add('date-divider');
+      dateDivider.innerHTML = '<span>Today</span>';
+      chatMessages.appendChild(dateDivider);
+      
+      // Display welcome message immediately
+      addMessage('Hello! I\'m Nexus, your advanced AI assistant. I can help with daily routines, meal planning, activity suggestions, and much more. How can I assist you today?', 'incoming');
+      
+      // Event Listeners
+      
+      // Toggle emoji panel
+      emojiButton.addEventListener('click', function() {
+        emojiPanel.classList.toggle('active');
+        
+        // If opening panel, populate with active category
+        if (emojiPanel.classList.contains('active')) {
+          const activeTab = emojiTabs.querySelector('.emoji-tab.active');
+          populateEmojiPanel(activeTab.dataset.category);
+          if (isSoundEnabled) sounds.toggle.play();
+        }
+      });
+      
+      // Switch emoji categories
+      emojiTabs.addEventListener('click', function(e) {
+        if (e.target.classList.contains('emoji-tab')) {
+          // Remove active class from all tabs
+          emojiTabs.querySelectorAll('.emoji-tab').forEach(tab => {
+            tab.classList.remove('active');
+          });
+          
+          // Add active class to clicked tab
+          e.target.classList.add('active');
+          
+          // Populate emoji panel with selected category
+          populateEmojiPanel(e.target.dataset.category);
+          if (isSoundEnabled) sounds.toggle.play();
+        }
+      });
+      
+      // Toggle voice recording
+      voiceButton.addEventListener('click', function() {
+        toggleVoiceRecording();
+      });
+      
+      // Voice recording actions
+      voiceCancel.addEventListener('click', function() {
+        stopVoiceRecording(false);
+      });
+      
+      voiceSend.addEventListener('click', function() {
+        stopVoiceRecording(true);
+        // Simulate voice message
+        const voiceMessages = [
+          "Can you suggest a morning routine?",
+          "What are some healthy snack ideas?",
+          "Give me productivity tips please",
+          "Help me create a workout plan"
+        ];
+        const randomMessage = voiceMessages[Math.floor(Math.random() * voiceMessages.length)];
+        messageInput.value = randomMessage;
+        sendMessage();
+      });
+      
+      // Toggle search
+      searchButton.addEventListener('click', function() {
+        searchContainer.classList.add('active');
+        setTimeout(() => {
+          searchInput.focus();
+        }, 300);
+        if (isSoundEnabled) sounds.toggle.play();
+      });
+      
+      searchClose.addEventListener('click', function() {
+        searchContainer.classList.remove('active');
+        searchInput.value = '';
+      });
+      
+      // Toggle theme
+      themeToggle.addEventListener('click', function() {
+        document.body.classList.toggle('dark-mode');
+        currentTheme = document.body.classList.contains('dark-mode') ? 'dark' : 'light';
+        
+        // Update theme options in settings
+        document.querySelectorAll('.theme-option').forEach(option => {
+          option.classList.remove('active');
+        });
+        document.querySelector(`.theme-${currentTheme}`).classList.add('active');
+        
+        if (isSoundEnabled) sounds.toggle.play();
+        
+        // Save preference
+        localStorage.setItem('nexus-theme', currentTheme);
+        
+        // Show toast
+        showToast('Theme updated', `${currentTheme.charAt(0).toUpperCase() + currentTheme.slice(1)} mode is now active`, 'info');
+      });
+      
+      // Theme options in settings
+      themeOptions.forEach(option => {
+        option.addEventListener('click', function() {
+          const theme = this.dataset.theme;
+          if (theme === 'dark') {
+            document.body.classList.add('dark-mode');
+            currentTheme = 'dark';
+          } else {
+            document.body.classList.remove('dark-mode');
+            currentTheme = 'light';
+          }
+          
+          // Update active class
+          themeOptions.forEach(opt => opt.classList.remove('active'));
+          this.classList.add('active');
+          
+          if (isSoundEnabled) sounds.toggle.play();
+          
+          // Save preference
+          localStorage.setItem('nexus-theme', currentTheme);
+        });
+      });
+      
+      // Toggle settings
+      settingsButton.addEventListener('click', function() {
+        settingsPanel.classList.add('active');
+        if (isSoundEnabled) sounds.toggle.play();
+      });
+      
+      settingsClose.addEventListener('click', function() {
+        settingsPanel.classList.remove('active');
+      });
+      
+      // Settings toggles
+      soundToggle.addEventListener('click', function() {
+        this.classList.toggle('active');
+        isSoundEnabled = this.classList.contains('active');
+        localStorage.setItem('nexus-sound', isSoundEnabled);
+        if (isSoundEnabled) sounds.toggle.play();
+      });
+      
+      typingToggle.addEventListener('click', function() {
+        this.classList.toggle('active');
+        isTypingEnabled = this.classList.contains('active');
+        localStorage.setItem('nexus-typing', isTypingEnabled);
+        if (isSoundEnabled) sounds.toggle.play();
+      });
+      
+      animationsToggle.addEventListener('click', function() {
+        this.classList.toggle('active');
+        isAnimationsEnabled = this.classList.contains('active');
+        document.documentElement.style.setProperty('--transition', isAnimationsEnabled ? 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)' : 'none');
+        document.documentElement.style.setProperty('--fast-transition', isAnimationsEnabled ? 'all 0.2s ease-out' : 'none');
+        localStorage.setItem('nexus-animations', isAnimationsEnabled);
+        if (isSoundEnabled) sounds.toggle.play();
+      });
+      
+      // Font size controls
+      fontDecrease.addEventListener('click', function() {
+        if (fontSizePercent > 70) {
+          fontSizePercent -= 10;
+          updateFontSize();
+        }
+      });
+      
+      fontIncrease.addEventListener('click', function() {
+        if (fontSizePercent < 130) {
+          fontSizePercent += 10;
+          updateFontSize();
+        }
+      });
+      
+      // Animation slider handling
+      const animationSlider = document.getElementById('animation-slider');
+      const sliderHandle = document.querySelector('.slider-handle');
+      const sliderFill = document.querySelector('.slider-fill');
+      
+      let isDragging = false;
+      
+      animationSlider.addEventListener('mousedown', startSliderDrag);
+      document.addEventListener('mousemove', moveSlider);
+      document.addEventListener('mouseup', stopSliderDrag);
+      
+      animationSlider.addEventListener('click', function(e) {
+        if (!isDragging) {
+          const sliderRect = this.getBoundingClientRect();
+          const percentage = ((e.clientX - sliderRect.left) / sliderRect.width) * 100;
+          updateSlider(percentage);
+        }
+      });
+      
+      function startSliderDrag(e) {
+        isDragging = true;
+        document.body.style.userSelect = 'none';
+      }
+      
+      function moveSlider(e) {
+        if (isDragging) {
+          const sliderRect = animationSlider.getBoundingClientRect();
+          const percentage = Math.max(0, Math.min(100, ((e.clientX - sliderRect.left) / sliderRect.width) * 100));
+          updateSlider(percentage);
+        }
+      }
+      
+      function stopSliderDrag() {
+        if (isDragging) {
+          isDragging = false;
+          document.body.style.userSelect = '';
+        }
+      }
+      
+      function updateSlider(percentage) {
+        sliderHandle.style.left = `${percentage}%`;
+        sliderFill.style.width = `${percentage}%`;
+        animationSpeed = 1 + (percentage / 100);
+        document.documentElement.style.setProperty('--transition', `all ${0.3/animationSpeed}s cubic-bezier(0.25, 0.8, 0.25, 1)`);
+        document.documentElement.style.setProperty('--fast-transition', `all ${0.2/animationSpeed}s ease-out`);
+        localStorage.setItem('nexus-animation-speed', animationSpeed);
+      }
+      
+      // Select suggestion chip with animation
+      suggestionChips.forEach(chip => {
+        chip.addEventListener('click', function(e) {
+          animateSuggestionToInput(this, this.textContent);
+          e.stopPropagation();
+        });
+      });
+      
+      // Message reaction handling
+      document.addEventListener('click', function(e) {
+        // Handle reaction button clicks
+        if (e.target.closest('.message-option-btn.reaction-btn')) {
+          const messageElement = e.target.closest('.message');
+          toggleReactionPanel(messageElement);
+        }
+        
+        // Handle reaction selection
+        if (e.target.closest('.reaction-button')) {
+          const emoji = e.target.closest('.reaction-button').dataset.emoji;
+          addReactionToMessage(currentReactionMessage, emoji);
+          reactionContainer.classList.remove('show');
+        }
+        
+        // Hide reaction panel when clicking elsewhere
+        if (!e.target.closest('.add-reaction-container') && 
+            !e.target.closest('.message-option-btn.reaction-btn')) {
+          reactionContainer.classList.remove('show');
+        }
+      });
+      
+      // Send message on button click
+      sendButton.addEventListener('click', sendMessage);
+      
+      // Send message on Enter key
+      messageInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && !emojiSuggestions.classList.contains('visible')) {
+          sendMessage();
+        }
+      });
+      
+      // Keyboard shortcuts
+      document.addEventListener('keydown', function(e) {
+        // Ctrl + F for search
+        if (e.ctrlKey && e.key === 'f') {
+          e.preventDefault();
+          searchContainer.classList.add('active');
+          setTimeout(() => {
+            searchInput.focus();
+          }, 300);
+        }
+        
+        // Ctrl + D for dark mode toggle
+        if (e.ctrlKey && e.key === 'd') {
+          e.preventDefault();
+          document.body.classList.toggle('dark-mode');
+          currentTheme = document.body.classList.contains('dark-mode') ? 'dark' : 'light';
+          localStorage.setItem('nexus-theme', currentTheme);
+        }
+        
+        // Ctrl + S for settings
+        if (e.ctrlKey && e.key === 's') {
+          e.preventDefault();
+          settingsPanel.classList.add('active');
+        }
+        
+        // Escape to close panels
+        if (e.key === 'Escape') {
+          if (searchContainer.classList.contains('active')) {
+            searchContainer.classList.remove('active');
+          }
+          if (settingsPanel.classList.contains('active')) {
+            settingsPanel.classList.remove('active');
+          }
+          if (emojiPanel.classList.contains('active')) {
+            emojiPanel.classList.remove('active');
+          }
+          if (reactionContainer.classList.contains('show')) {
+            reactionContainer.classList.remove('show');
+          }
+          if (isRecording) {
+            stopVoiceRecording(false);
+          }
+        }
+      });
+      
+      // Initialize from saved preferences
+      initializePreferences();
+      
+      // Functions
+      
+      function initializePreferences() {
+        // Theme
+        const savedTheme = localStorage.getItem('nexus-theme') || 'light';
+        if (savedTheme === 'dark') {
+          document.body.classList.add('dark-mode');
+          currentTheme = 'dark';
+          document.querySelector('.theme-dark').classList.add('active');
+          document.querySelector('.theme-light').classList.remove('active');
+        }
+        
+        // Sound
+        isSoundEnabled = localStorage.getItem('nexus-sound') === 'true';
+        if (isSoundEnabled) {
+          soundToggle.classList.add('active');
+        } else {
+          soundToggle.classList.remove('active');
+        }
+        
+        // Typing indicator
+        isTypingEnabled = localStorage.getItem('nexus-typing') !== 'false';
+        if (isTypingEnabled) {
+          typingToggle.classList.add('active');
+        } else {
+          typingToggle.classList.remove('active');
+        }
+        
+        // Animations
+        isAnimationsEnabled = localStorage.getItem('nexus-animations') !== 'false';
+        if (isAnimationsEnabled) {
+          animationsToggle.classList.add('active');
+        } else {
+          animationsToggle.classList.remove('active');
+          document.documentElement.style.setProperty('--transition', 'none');
+          document.documentElement.style.setProperty('--fast-transition', 'none');
+        }
+        
+        // Animation speed
+        animationSpeed = parseFloat(localStorage.getItem('nexus-animation-speed')) || 1;
+        const percentage = ((animationSpeed - 1) * 100);
+        sliderHandle.style.left = `${percentage}%`;
+        sliderFill.style.width = `${percentage}%`;
+        
+        // Font size
+        fontSizePercent = parseInt(localStorage.getItem('nexus-font-size')) || 100;
+        updateFontSize();
+      }
+      
+      function updateFontSize() {
+        document.documentElement.style.setProperty('--font-size-factor', fontSizePercent / 100);
+        const fontSize = Math.round(15 * (fontSizePercent / 100));
+        fontPreview.style.fontSize = `${fontSize}px`;
+        fontPreview.textContent = `Text Size (${fontSizePercent}%)`;
+        messageInput.style.fontSize = `${fontSize}px`;
+        
+        // Update message text sizes
+        document.querySelectorAll('.message-content').forEach(content => {
+          content.style.fontSize = `${fontSize}px`;
+        });
+        
+        localStorage.setItem('nexus-font-size', fontSizePercent);
+      }
+      
+      function toggleVoiceRecording() {
+        if (isRecording) {
+          stopVoiceRecording(false);
+        } else {
+          startVoiceRecording();
+        }
+      }
+      
+      function startVoiceRecording() {
+        isRecording = true;
+        voiceButton.classList.add('recording');
+        voiceFeedback.classList.add('active');
+        
+        // Simulate permission request
+        showToast('Microphone access', 'Voice recording activated', 'info');
+        
+        if (isSoundEnabled) {
+          sounds.toggle.play();
+        }
+      }
+      
+      function stopVoiceRecording(sendVoice) {
+        isRecording = false;
+        voiceButton.classList.remove('recording');
+        voiceFeedback.classList.remove('active');
+        
+        if (sendVoice) {
+          showToast('Voice message', 'Processing your voice command...', 'info');
+        }
+        
+        if (isSoundEnabled) {
+          sounds.toggle.play();
+        }
+      }
+      
+      function toggleReactionPanel(messageElement) {
+        // Store the current message for reaction
+        currentReactionMessage = messageElement;
+        
+        // Position the reaction container
+        const messageRect = messageElement.getBoundingClientRect();
+        const containerTop = messageRect.top - 45; // Position above the message
+        
+        if (messageElement.classList.contains('message-outgoing')) {
+          const containerRight = window.innerWidth - messageRect.right;
+          reactionContainer.style.right = `${containerRight}px`;
+          reactionContainer.style.left = 'auto';
+        } else {
+          reactionContainer.style.left = `${messageRect.left}px`;
+          reactionContainer.style.right = 'auto';
+        }
+        
+        reactionContainer.style.top = `${containerTop}px`;
+        reactionContainer.classList.add('show');
+      }
+      
+      function addReactionToMessage(messageElement, emoji) {
+        // Check if there's already a reactions container
+        let reactionsContainer = messageElement.querySelector('.message-reactions');
+        
+        if (!reactionsContainer) {
+          reactionsContainer = document.createElement('div');
+          reactionsContainer.classList.add('message-reactions');
+          messageElement.appendChild(reactionsContainer);
+        }
+        
+        // Check if this emoji already exists in reactions
+        const existingReaction = reactionsContainer.querySelector(`.reaction[data-emoji="${emoji}"]`);
+        
+        if (existingReaction) {
+          // Increment count
+          const countElement = existingReaction.querySelector('.reaction-count');
+          let count = parseInt(countElement.textContent);
+          countElement.textContent = ++count;
+        } else {
+          // Create new reaction
+          const reaction = document.createElement('div');
+          reaction.classList.add('reaction');
+          reaction.dataset.emoji = emoji;
+          reaction.innerHTML = `${emoji} <span class="reaction-count">1</span>`;
+          reactionsContainer.appendChild(reaction);
+        }
+        
+        if (isSoundEnabled) {
+          sounds.notification.play();
+        }
+      }
+      
+      function showToast(title, message, type = 'info') {
+        const toastId = `toast-${toastIdCounter++}`;
+        const toast = document.createElement('div');
+        toast.classList.add('toast');
+        toast.classList.add(`toast-${type}`);
+        toast.id = toastId;
+        
+        let iconSvg = '';
+        if (type === 'success') {
+          iconSvg = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+        } else if (type === 'error') {
+          iconSvg = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>';
+        } else {
+          iconSvg = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>';
+        }
+        
+        toast.innerHTML = `
+          <div class="toast-icon">${iconSvg}</div>
+          <div class="toast-content">
+            <div class="toast-title">${title}</div>
+            <div class="toast-message">${message}</div>
+          </div>
+          <div class="toast-progress"></div>
+        `;
+        
+        toastContainer.appendChild(toast);
+        activeToasts.push(toastId);
+        
+        if (isSoundEnabled) {
+          sounds.notification.play();
+        }
+        
+        // Auto dismiss after 5 seconds
+        setTimeout(() => {
+          dismissToast(toastId);
+        }, 5000);
+        
+        // Click to dismiss
+        toast.addEventListener('click', () => {
+          dismissToast(toastId);
+        });
+        
+        return toastId;
+      }
+      
+      function dismissToast(toastId) {
+        const toast = document.getElementById(toastId);
+        if (toast) {
+          toast.classList.add('toast-closing');
+          setTimeout(() => {
+            toast.remove();
+            activeToasts = activeToasts.filter(id => id !== toastId);
+          }, 300);
+        }
+      }
+      
+      function populateEmojiPanel(category) {
+        // Clear existing emojis
+        emojiContent.innerHTML = '';
+        
+        // Add emojis from the selected category
+        emojiCategories[category].forEach(emoji => {
+          const emojiElement = document.createElement('div');
+          emojiElement.classList.add('emoji-item');
+          emojiElement.textContent = emoji;
+          emojiElement.addEventListener('click', function() {
+            insertEmoji(emoji);
+          });
+          emojiContent.appendChild(emojiElement);
+        });
+      }
+      
+      // Insert emoji into message input
+      function insertEmoji(emoji) {
+        const cursorPos = messageInput.selectionStart;
+        const textBefore = messageInput.value.substring(0, cursorPos);
+        const textAfter = messageInput.value.substring(cursorPos);
+        
+        // Create animation
+        animateEmojiInsertion(emoji, cursorPos);
+        
+        // Close emoji panel
+        emojiPanel.classList.remove('active');
+      }
+      
+      function animateEmojiInsertion(emoji, cursorPos) {
+        // Get position for animation
+        const inputRect = messageInput.getBoundingClientRect();
+        const startX = inputRect.left + 100; // Start from middle of panel
+        const startY = emojiPanel.getBoundingClientRect().top + 50;
+        const endX = inputRect.left + 20 + (cursorPos * 8); // Approximate position based on cursor
+        const endY = inputRect.top + (inputRect.height / 2);
+        
+        // Set up the moving emoji for animation
+        movingEmoji.textContent = emoji;
+        movingEmoji.style.top = `${startY}px`;
+        movingEmoji.style.left = `${startX}px`;
+        movingEmoji.style.opacity = '1';
+        
+        // Animate the emoji moving to the input position
+        setTimeout(() => {
+          movingEmoji.style.top = `${endY}px`;
+          movingEmoji.style.left = `${endX}px`;
+          
+          // After animation completes, insert the emoji
+          setTimeout(() => {
+            movingEmoji.style.opacity = '0';
+            
+            // Insert emoji at cursor position
+            const textBefore = messageInput.value.substring(0, cursorPos);
+            const textAfter = messageInput.value.substring(cursorPos);
+            messageInput.value = textBefore + emoji + textAfter;
+            
+            // Move cursor after the inserted emoji
+            messageInput.setSelectionRange(cursorPos + emoji.length, cursorPos + emoji.length);
+            messageInput.focus();
+          }, 300);
+        }, 50);
+      }
+      
+      // Emoji suggestion functionality
+      messageInput.addEventListener('input', function() {
+        const text = this.value;
+        const lastWord = getLastWord(text);
+        
+        // Hide emoji suggestions if they're visible and no matching word
+        if (emojiSuggestions.classList.contains('visible')) {
+          if (!lastWord || !emojiMap[lastWord.toLowerCase()]) {
+            emojiSuggestions.classList.remove('visible');
+            emojiSuggestions.innerHTML = '';
+          }
+        }
+        
+        // Hide emoji panel when typing
+        if (emojiPanel.classList.contains('active')) {
+          emojiPanel.classList.remove('active');
+        }
+        
+        // Handle suggestions display
+        if (this.value.trim() === '') {
+          inputSuggestionsContainer.classList.remove('hidden');
+        } else {
+          inputSuggestionsContainer.classList.add('hidden');
+          
+          // Check if last word is an emoji keyword
+          if (lastWord && emojiMap[lastWord.toLowerCase()]) {
+            showEmojiSuggestions(lastWord.toLowerCase(), getCursorPosition());
+          }
+        }
+      });
+      
+      // Track cursor position for placing emoji suggestions
+      function getCursorPosition() {
+        return messageInput.selectionStart;
+      }
+      
+      // Get the last word of input text
+      function getLastWord(text) {
+        const words = text.split(/\s+/);
+        return words[words.length - 1];
+      }
+      
+      // Show emoji suggestions for the given word
+      function showEmojiSuggestions(word, position) {
+        // Clear existing emoji suggestions
+        emojiSuggestions.innerHTML = '';
+        
+        if (!emojiMap[word]) return;
+        
+        // Create emoji options
+        emojiMap[word].forEach((emoji, index) => {
+          const option = document.createElement('div');
+          option.classList.add('emoji-option');
+          if (index === 0) option.classList.add('active');
+          option.textContent = emoji;
+          option.dataset.emoji = emoji;
+          option.dataset.word = word;
+          
+          option.addEventListener('click', function(e) {
+            replaceWordWithEmoji(this.dataset.word, this.dataset.emoji);
+            e.stopPropagation();
+          });
+          
+          emojiSuggestions.appendChild(option);
+        });
+        
+        // Show emoji suggestions with animation
+        emojiSuggestions.classList.add('visible');
+      }
+      
+      // Replace the word with emoji
+      function replaceWordWithEmoji(word, emoji) {
+        const text = messageInput.value;
+        const cursorPos = getCursorPosition();
+        
+        // Find the word in the text near the cursor
+        const textBeforeCursor = text.substring(0, cursorPos);
+        const wordPos = textBeforeCursor.lastIndexOf(word);
+        
+        if (wordPos !== -1) {
+          // Get position and dimensions of the word
+          const tempSpan = document.createElement('span');
+          tempSpan.style.visibility = 'hidden';
+          tempSpan.style.position = 'absolute';
+          tempSpan.style.whiteSpace = 'pre';
+          tempSpan.style.font = window.getComputedStyle(messageInput).font;
+          tempSpan.textContent = text.substring(0, wordPos);
+          document.body.appendChild(tempSpan);
+          
+          const inputRect = messageInput.getBoundingClientRect();
+          const wordLeft = inputRect.left + tempSpan.offsetWidth;
+          const wordTop = inputRect.top + (inputRect.height / 2) - 11;
+          
+          document.body.removeChild(tempSpan);
+          
+          // Set up the moving emoji for animation
+          movingEmoji.textContent = emoji;
+          movingEmoji.style.top = `${emojiSuggestions.getBoundingClientRect().top + 19}px`;
+          movingEmoji.style.left = `${emojiSuggestions.querySelector('.emoji-option.active').getBoundingClientRect().left + 19}px`;
+          movingEmoji.style.opacity = '1';
+          
+          // Animate the emoji moving to the word position
+          setTimeout(() => {
+            movingEmoji.style.top = `${wordTop}px`;
+            movingEmoji.style.left = `${wordLeft}px`;
+            
+            // After animation completes, replace the word
+            setTimeout(() => {
+              movingEmoji.style.opacity = '0';
+              
+              // Construct new text with the emoji replacing the word
+              const newText = text.substring(0, wordPos) + emoji + text.substring(wordPos + word.length);
+              messageInput.value = newText;
+              
+              // Set cursor position after the emoji
+              messageInput.setSelectionRange(wordPos + emoji.length, wordPos + emoji.length);
+              messageInput.focus();
+              
+              // Hide emoji suggestions
+              emojiSuggestions.classList.remove('visible');
+            }, 300);
+          }, 50);
+        }
+      }
+      
+      // Arrow keys to navigate emoji suggestions
+      messageInput.addEventListener('keydown', function(e) {
+        if (emojiSuggestions.classList.contains('visible')) {
+          const activeOption = emojiSuggestions.querySelector('.emoji-option.active');
+          const options = emojiSuggestions.querySelectorAll('.emoji-option');
+          
+          if (e.key === 'ArrowRight') {
+            e.preventDefault();
+            const nextElem = activeOption.nextElementSibling || options[0];
+            activeOption.classList.remove('active');
+            nextElem.classList.add('active');
+          } else if (e.key === 'ArrowLeft') {
+            e.preventDefault();
+            const prevElem = activeOption.previousElementSibling || options[options.length - 1];
+            activeOption.classList.remove('active');
+            prevElem.classList.add('active');
+          } else if (e.key === 'Tab' || e.key === 'Enter') {
+            e.preventDefault();
+            const emoji = activeOption.dataset.emoji;
+            const word = activeOption.dataset.word;
+            replaceWordWithEmoji(word, emoji);
+          } else if (e.key === 'Escape') {
+            emojiSuggestions.classList.remove('visible');
+          }
+        } else if (emojiPanel.classList.contains('active') && e.key === 'Escape') {
+          emojiPanel.classList.remove('active');
+        }
+      });
+      
+      // Animate suggestion to input field
+      function animateSuggestionToInput(element, text) {
+        // Get positions
+        const rect = element.getBoundingClientRect();
+        const inputRect = messageInput.getBoundingClientRect();
+        
+        // Set initial position of moving element
+        movingSuggestion.style.top = rect.top + 'px';
+        movingSuggestion.style.left = rect.left + 'px';
+        movingSuggestion.style.width = rect.width + 'px';
+        movingSuggestion.style.height = rect.height + 'px';
+        movingSuggestion.textContent = text;
+        movingSuggestion.style.opacity = '1';
+        
+        // Animate to input field - perfectly centered in the input
+        setTimeout(() => {
+          // Calculate exact position to fit in input field
+          movingSuggestion.style.top = (inputRect.top + (inputRect.height/2 - rect.height/2)) + 'px';
+          movingSuggestion.style.left = (inputRect.left + 20) + 'px'; // Match the input padding
+          movingSuggestion.style.width = 'auto'; // Let it size to content
+          movingSuggestion.style.maxWidth = (inputRect.width - 40) + 'px'; // Match input width minus padding
+          movingSuggestion.style.background = 'transparent'; // Fade the background
+          movingSuggestion.style.borderColor = 'transparent'; // Fade the border
+          
+          // After animation completes
+          setTimeout(() => {
+            movingSuggestion.style.opacity = '0';
+            messageInput.value = text;
+            messageInput.focus();
+            inputSuggestionsContainer.classList.add('hidden');
+          }, 300);
+        }, 50);
+      }
+      
+      function sendMessage() {
+        const messageText = messageInput.value.trim();
+        if (messageText === '') return;
+        
+        // Add outgoing message
+        addMessage(messageText, 'outgoing');
+        messageInput.value = '';
+        
+        // Show suggestions again when input is cleared
+        inputSuggestionsContainer.classList.remove('hidden');
+        
+        if (isSoundEnabled) {
+          sounds.send.play();
+        }
+        
+        // Show typing indicator with smooth scroll
+        if (isTypingEnabled) {
+          showTypingIndicator();
+        }
+        
+        // Simulate AI thinking time based on message complexity
+        let thinkTime = 1200 + Math.random() * 1500;
+        if (messageText.length > 40) thinkTime += 1000;
+        if (messageText.includes('routine') || messageText.includes('plan') || messageText.includes('suggest')) {
+          thinkTime += 1500;
+        }
+        
+        setTimeout(() => {
+          if (isTypingEnabled) {
+            removeTypingIndicator();
+          }
+          
+          // Process the message and generate a response
+          const response = generateResponse(messageText);
+          addMessage(response, 'incoming');
+          
+          if (isSoundEnabled) {
+            sounds.message.play();
+          }
+          
+        }, thinkTime);
+      }
+      
+      function addMessage(text, type) {
+        const messageDiv = document.createElement('div');
+        messageDiv.classList.add('message', `message-${type}`);
+        
+        const contentDiv = document.createElement('div');
+        contentDiv.classList.add('message-content');
+        
+        // Check if the response is HTML (for formatted content)
+        if (text.includes('<routine-card>') || text.includes('<div class="list-card">') || text.includes('<div class="suggestion-grid">')) {
+          contentDiv.innerHTML = text;
+        } else {
+          contentDiv.textContent = text;
+        }
+        
+        // Add AI indicator for incoming messages
+        if (type === 'incoming') {
+          const aiIndicator = document.createElement('div');
+          aiIndicator.classList.add('ai-indicator');
+          aiIndicator.innerHTML = 'AI <span class="wave">•</span>';
+          contentDiv.appendChild(aiIndicator);
+        }
+        
+        // Add message options
+        const messageOptions = document.createElement('div');
+        messageOptions.classList.add('message-options');
+        
+        // Add reaction button
+        const reactionBtn = document.createElement('div');
+        reactionBtn.classList.add('message-option-btn', 'reaction-btn');
+        reactionBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"></path><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>';
+        reactionBtn.title = "Add reaction";
+        
+        messageOptions.appendChild(reactionBtn);
+        
+        const timeDiv = document.createElement('div');
+        timeDiv.classList.add('message-time');
+        timeDiv.textContent = getCurrentTime();
+        
+        messageDiv.appendChild(contentDiv);
+        messageDiv.appendChild(timeDiv);
+        messageDiv.appendChild(messageOptions);
+        
+        chatMessages.appendChild(messageDiv);
+        
+        // Scroll to the bottom
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+      
+      function showTypingIndicator() {
+        const typingDiv = document.createElement('div');
+        typingDiv.classList.add('typing-indicator');
+        typingDiv.id = 'typing-indicator';
+        
+        for (let i = 0; i < 3; i++) {
+          const dot = document.createElement('span');
+          dot.classList.add('typing-dot');
+          typingDiv.appendChild(dot);
+        }
+        
+        chatMessages.appendChild(typingDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+      
+      function removeTypingIndicator() {
+        const typingIndicator = document.getElementById('typing-indicator');
+        if (typingIndicator) {
+          typingIndicator.remove();
+        }
+      }
+      
+      function getCurrentTime() {
+        const now = new Date();
+        return now.getHours().toString().padStart(2, '0') + ':' + 
+               now.getMinutes().toString().padStart(2, '0');
+      }
+      
+      function generateDailyRoutine() {
+        return `<routine-card>
+          <div class="routine-header">
+            Daily Routine Plan
+          </div>
+          <div class="routine-item">
+            <div class="routine-time">6:30 AM</div>
+            <div class="routine-description">Wake up & hydrate with 16oz water</div>
+          </div>
+          <div class="routine-item">
+            <div class="routine-time">7:00 AM</div>
+            <div class="routine-description">15-minute light stretching or yoga</div>
+          </div>
+          <div class="routine-item">
+            <div class="routine-time">7:30 AM</div>
+            <div class="routine-description">Balanced breakfast: protein, healthy fats & complex carbs</div>
+          </div>
+          <div class="routine-item">
+            <div class="routine-time">8:30 AM</div>
+            <div class="routine-description">Focus work / productive hours with breaks</div>
+          </div>
+          <div class="routine-item">
+            <div class="routine-time">12:00 PM</div>
+            <div class="routine-description">Nourishing lunch & short walk</div>
+          </div>
+          <div class="routine-item">
+            <div class="routine-time">3:00 PM</div>
+            <div class="routine-description">Healthy snack & brief movement break</div>
+          </div>
+          <div class="routine-item">
+            <div class="routine-time">5:30 PM</div>
+            <div class="routine-description">30-45 min exercise (alternate cardio & strength)</div>
+          </div>
+          <div class="routine-item">
+            <div class="routine-time">7:00 PM</div>
+            <div class="routine-description">Nutrient-rich dinner with veggies</div>
+          </div>
+          <div class="routine-item">
+            <div class="routine-time">8:30 PM</div>
+            <div class="routine-description">Wind down: no screens, relaxing activity</div>
+          </div>
+          <div class="routine-item">
+            <div class="routine-time">10:00 PM</div>
+            <div class="routine-description">Sleep for 7-8 hours of quality rest</div>
+          </div>
+        </routine-card>
+        
+        This balanced routine incorporates nutrition, hydration, movement, productivity, and proper rest. Would you like me to customize any aspect of this plan for your specific needs?`;
+      }
+      
+      function generateMealSuggestions() {
+        return `<div class="list-card">
+          <div class="list-title">Healthy Meal Suggestions</div>
+          <div class="list-item"><strong>Breakfast:</strong> Greek yogurt with berries, nuts and honey; or overnight oats with chia seeds and fruit; or veggie omelet with whole grain toast.</div>
+          <div class="list-item"><strong>Lunch:</strong> Quinoa bowl with roasted vegetables and grilled chicken; or Mediterranean salad with chickpeas, feta and olive oil dressing; or lentil soup with mixed greens.</div>
+          <div class="list-item"><strong>Dinner:</strong> Baked salmon with sweet potato and steamed broccoli; or turkey and vegetable stir-fry with brown rice; or bean and vegetable chili with avocado.</div>
+          <div class="list-item"><strong>Snacks:</strong> Apple with almond butter; hummus with veggie sticks; trail mix with nuts and dried fruit; or protein smoothie with spinach and banana.</div>
+        </div>
+        
+        <div class="suggestion-grid">
+          <div class="suggestion-item">
+            <div class="suggestion-emoji">🥑</div>
+            <div class="suggestion-title">Power Breakfast</div>
+            <div class="suggestion-desc">Avocado toast on whole grain bread with poached eggs and a sprinkle of hemp seeds</div>
+          </div>
+          <div class="suggestion-item">
+            <div class="suggestion-emoji">🍲</div>
+            <div class="suggestion-title">Batch Cook</div>
+            <div class="suggestion-desc">Prepare grain bowls for the week with roasted veggies, proteins, and homemade dressing</div>
+          </div>
+          <div class="suggestion-item">
+            <div class="suggestion-emoji">💧</div>
+            <div class="suggestion-title">Hydration Tip</div>
+            <div class="suggestion-desc">Infuse water with cucumber, lemon or berries to encourage drinking throughout the day</div>
+          </div>
+          <div class="suggestion-item">
+            <div class="suggestion-emoji">🍓</div>
+            <div class="suggestion-title">Smart Snacking</div>
+            <div class="suggestion-desc">Keep cut fruit, prepared veggies, and portioned nuts ready for quick, healthy options</div>
+          </div>
+        </div>
+        
+        Would you like more specific meal ideas or recipes for any particular dietary preferences?`;
+      }
+      
+      function generateActivitySuggestions() {
+        return `<div class="list-card">
+          <div class="list-title">Daily Activity Recommendations</div>
+          <div class="list-item"><strong>Morning Boost:</strong> 10-minute high-intensity interval training (HIIT) or 15-minute yoga flow to energize for the day.</div>
+          <div class="list-item"><strong>Work Breaks:</strong> 5-minute stretching sessions every hour or two; alternate between desk stretches and brief walking breaks.</div>
+          <div class="list-item"><strong>Midday Movement:</strong> 15-30 minute walk after lunch to aid digestion and reset mental focus.</div>
+          <div class="list-item"><strong>Evening Activity:</strong> 30-45 minutes of moderate exercise like cycling, swimming, strength training, or a fitness class.</div>
+          <div class="list-item"><strong>Weekend Options:</strong> Longer outdoor activities like hiking, biking, kayaking, or team sports for both physical and mental benefits.</div>
+        </div>
+        
+        <div class="suggestion-grid">
+          <div class="suggestion-item">
+            <div class="suggestion-emoji">🧘</div>
+            <div class="suggestion-title">Mindful Moments</div>
+            <div class="suggestion-desc">Incorporate 10-min meditation or deep breathing sessions to reduce stress and improve focus</div>
+          </div>
+          <div class="suggestion-item">
+            <div class="suggestion-emoji">🚶</div>
+            <div class="suggestion-title">Step Goal</div>
+            <div class="suggestion-desc">Aim for 8,000-10,000 steps daily through intentional walks and daily movement</div>
+          </div>
+          <div class="suggestion-item">
+            <div class="suggestion-emoji">💪</div>
+            <div class="suggestion-title">Strength Focus</div>
+            <div class="suggestion-desc">Include bodyweight exercises like squats, push-ups and planks 2-3 times per week</div>
+          </div>
+          <div class="suggestion-item">
+            <div class="suggestion-emoji">🎯</div>
+            <div class="suggestion-title">Weekly Balance</div>
+            <div class="suggestion-desc">Mix cardio, strength, flexibility and rest days for complete fitness</div>
+          </div>
+        </div>
+        
+        Would you like me to create a more detailed weekly exercise plan tailored to your fitness level and goals?`;
+      }
+      
+      function generateWeeklyWorkout() {
+        return `<div class="list-card">
+          <div class="list-title">7-Day Workout Plan</div>
+          <div class="list-item"><strong>Monday:</strong> Upper body strength training (30-45 min) + 10 min core exercises</div>
+          <div class="list-item"><strong>Tuesday:</strong> 30 min cardio (running, cycling, or rowing) + mobility work</div>
+          <div class="list-item"><strong>Wednesday:</strong> Lower body strength training (30-45 min) + 15 min stretching</div>
+          <div class="list-item"><strong>Thursday:</strong> Active recovery: 30-40 min walking or light yoga</div>
+          <div class="list-item"><strong>Friday:</strong> Full body circuit training (30 min) or HIIT workout</div>
+          <div class="list-item"><strong>Saturday:</strong> Longer cardio session (45-60 min) or outdoor activity</div>
+          <div class="list-item"><strong>Sunday:</strong> Complete rest day or gentle yoga for recovery</div>
+        </div>
+        
+        This balanced plan incorporates strength, cardio, flexibility, and adequate recovery. Remember to warm up before each session and cool down after. Would you like specific exercises for any of these days?`;
+      }
+      
+      function generateMotivationalQuote() {
+        const quotes = [
+          "The only way to do great work is to love what you do. If you haven't found it yet, keep looking. Don't settle. - Steve Jobs",
+          "Success is not final, failure is not fatal: It is the courage to continue that counts. - Winston Churchill",
+          "Believe you can and you're halfway there. - Theodore Roosevelt",
+          "The future belongs to those who believe in the beauty of their dreams. - Eleanor Roosevelt",
+          "You are never too old to set another goal or to dream a new dream. - C.S. Lewis",
+          "The only limit to our realization of tomorrow will be our doubts of today. - Franklin D. Roosevelt",
+          "What you get by achieving your goals is not as important as what you become by achieving your goals. - Zig Ziglar",
+          "The mind is everything. What you think you become. - Buddha",
+          "Don't watch the clock; do what it does. Keep going. - Sam Levenson",
+          "Everything you've ever wanted is on the other side of fear. - George Addair"
+        ];
+        
+        const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+        return `"${randomQuote}"`;
+      }
+      
+      function generateSelfCareTips() {
+        return `<div class="list-card">
+          <div class="list-title">Self-Care Tips for Stress Relief</div>
+          <div class="list-item"><strong>Breathe:</strong> Practice deep breathing for 5 minutes (4 counts in, hold for 4, 6 counts out)</div>
+          <div class="list-item"><strong>Move:</strong> Even a 10-minute walk can reduce stress hormones and clear your mind</div>
+          <div class="list-item"><strong>Unplug:</strong> Set aside 30-60 minutes daily without screens or notifications</div>
+          <div class="list-item"><strong>Journal:</strong> Write down 3 things you're grateful for to shift focus to the positive</div>
+          <div class="list-item"><strong>Connect:</strong> Reach out to a supportive friend or family member</div>
+          <div class="list-item"><strong>Hydrate:</strong> Stress can be amplified by dehydration, so drink plenty of water</div>
+          <div class="list-item"><strong>Sleep:</strong> Prioritize 7-8 hours of quality sleep with a consistent schedule</div>
+          <div class="list-item"><strong>Nature:</strong> Spend time outdoors, even just 15 minutes can reduce stress levels</div>
+        </div>
+        
+        Would you like me to suggest a quick 5-minute stress relief exercise you can do right now?`;
+      }
+      
+      function generateEmailTemplate() {
+        return `<div class="list-card">
+          <div class="list-title">Professional Email Template</div>
+          <div class="list-item"><strong>Subject Line:</strong> [Specific Topic] - [Action Item/Timeline if applicable]</div>
+          <div class="list-item"><strong>Greeting:</strong> Dear [Name], / Hello [Name], / Good [morning/afternoon] [Name],</div>
+          <div class="list-item"><strong>Opening:</strong> I hope this email finds you well. / I'm reaching out regarding [topic].</div>
+          <div class="list-item"><strong>Main Content:</strong> 
+            [Paragraph 1: Context or background information]
+            [Paragraph 2: Specific details, requests, or information]
+            [Paragraph 3: Action items, deadlines, or next steps]</div>
+          <div class="list-item"><strong>Closing:</strong> Please let me know if you have any questions. / I look forward to your response. / Thank you for your consideration.</div>
+          <div class="list-item"><strong>Signature:</strong> 
+            Best regards, / Kind regards, / Sincerely,
+            [Your Name]
+            [Your Position]
+            [Contact Information]</div>
+        </div>
+        
+        Would you like me to draft a specific email for you? Just let me know the purpose and key information to include.`;
+      }
+      
+      function generateToDoTemplate() {
+        return `<div class="list-card">
+          <div class="list-title">Daily To-Do List Template</div>
+          <div class="list-item"><strong>Priority Tasks (Must Complete Today):</strong>
+            1. [Most important task]
+            2. [Second most important task]
+            3. [Third most important task]</div>
+          <div class="list-item"><strong>Secondary Tasks (Complete If Time Allows):</strong>
+            1. [Secondary task]
+            2. [Secondary task]
+            3. [Secondary task]</div>
+          <div class="list-item"><strong>Quick Wins (5-10 minutes each):</strong>
+            1. [Quick task]
+            2. [Quick task]
+            3. [Quick task]</div>
+          <div class="list-item"><strong>Appointments/Meetings:</strong>
+            • [Time]: [Meeting/appointment details]
+            • [Time]: [Meeting/appointment details]</div>
+          <div class="list-item"><strong>Self-Care & Well-being:</strong>
+            • [Exercise/movement plan]
+            • [Meal planning]
+            • [Personal time/relaxation]</div>
+          <div class="list-item"><strong>Notes & Reminders:</strong>
+            • [Any additional reminders]
+            • [Upcoming deadlines to keep in mind]</div>
+        </div>
+        
+        Would you like me to help you set up your to-do list for today or this week?`;
+      }
+      
+      function generateBookRecommendations() {
+        return `<div class="list-card">
+          <div class="list-title">Book Recommendations</div>
+          <div class="list-item"><strong>Fiction:</strong> "Project Hail Mary" by Andy Weir, "The Midnight Library" by Matt Haig, "The Lincoln Highway" by Amor Towles</div>
+          <div class="list-item"><strong>Non-Fiction:</strong> "Atomic Habits" by James Clear, "Four Thousand Weeks" by Oliver Burkeman, "Breath" by James Nestor</div>
+          <div class="list-item"><strong>Self-Development:</strong> "The Psychology of Money" by Morgan Housel, "Think Again" by Adam Grant, "Untamed" by Glennon Doyle</div>
+          <div class="list-item"><strong>Business:</strong> "Never Split the Difference" by Chris Voss, "Building a StoryBrand" by Donald Miller, "Range" by David Epstein</div>
+        </div>
+        
+        <div class="suggestion-grid">
+          <div class="suggestion-item">
+            <div class="suggestion-emoji">📚</div>
+            <div class="suggestion-title">Science Fiction</div>
+            <div class="suggestion-desc">"The Three-Body Problem" by Liu Cixin, "Dune" by Frank Herbert</div>
+          </div>
+          <div class="suggestion-item">
+            <div class="suggestion-emoji">🧠</div>
+            <div class="suggestion-title">Psychology</div>
+            <div class="suggestion-desc">"Thinking, Fast and Slow" by Daniel Kahneman, "Quiet" by Susan Cain</div>
+          </div>
+          <div class="suggestion-item">
+            <div class="suggestion-emoji">🏃</div>
+            <div class="suggestion-title">Motivation</div>
+            <div class="suggestion-desc">"Can't Hurt Me" by David Goggins, "The Mountain Is You" by Brianna Wiest</div>
+          </div>
+          <div class="suggestion-item">
+            <div class="suggestion-emoji">🌱</div>
+            <div class="suggestion-title">Mindfulness</div>
+            <div class="suggestion-desc">"The Things You Can See Only When You Slow Down" by Haemin Sunim</div>
+          </div>
+        </div>
+        
+        Would you like more targeted recommendations based on your preferences or a specific genre?`;
+      }
+      
+      function generateMorningRoutine() {
+        return `<div class="list-card">
+          <div class="list-title">Optimal Morning Routine</div>
+          <div class="list-item"><strong>5:30-6:00 AM:</strong> Wake up naturally (avoid hitting snooze)</div>
+          <div class="list-item"><strong>6:00-6:10 AM:</strong> Hydrate with room temperature water with lemon</div>
+          <div class="list-item"><strong>6:10-6:30 AM:</strong> Light movement/stretching to activate your body</div>
+          <div class="list-item"><strong>6:30-6:45 AM:</strong> Mindfulness practice (meditation or journaling)</div>
+          <div class="list-item"><strong>6:45-7:15 AM:</strong> Shower and get ready for the day</div>
+          <div class="list-item"><strong>7:15-7:45 AM:</strong> Nutritious breakfast without distractions</div>
+          <div class="list-item"><strong>7:45-8:00 AM:</strong> Review your day's priorities and set intentions</div>
+        </div>
+        
+        <div class="suggestion-grid">
+          <div class="suggestion-item">
+            <div class="suggestion-emoji">☀️</div>
+            <div class="suggestion-title">Light Exposure</div>
+            <div class="suggestion-desc">Get natural sunlight within 30-60 minutes of waking to regulate your circadian rhythm</div>
+          </div>
+          <div class="suggestion-item">
+            <div class="suggestion-emoji">📱</div>
+            <div class="suggestion-title">Digital Detox</div>
+            <div class="suggestion-desc">Avoid checking emails or social media for the first hour after waking</div>
+          </div>
+          <div class="suggestion-item">
+            <div class="suggestion-emoji">🧠</div>
+            <div class="suggestion-title">Priming</div>
+            <div class="suggestion-desc">Visualize your day going well and set positive intentions for 5 minutes</div>
+          </div>
+          <div class="suggestion-item">
+            <div class="suggestion-emoji">🌿</div>
+            <div class="suggestion-title">Morning Tea</div>
+            <div class="suggestion-desc">Green tea provides gentle caffeine and antioxidants for sustained energy</div>
+          </div>
+        </div>
+        
+        Would you like me to help you design a personalized morning routine based on your specific goals and schedule?`;
+      }
+      
+      function generateProductivityTips() {
+        return `<div class="list-card">
+          <div class="list-title">Productivity Enhancement Tips</div>
+          <div class="list-item"><strong>Time Blocking:</strong> Schedule specific blocks for different types of work rather than multitasking</div>
+          <div class="list-item"><strong>Pomodoro Technique:</strong> Work in focused 25-minute intervals with 5-minute breaks</div>
+          <div class="list-item"><strong>2-Minute Rule:</strong> If a task takes less than 2 minutes, do it immediately rather than scheduling it</div>
+          <div class="list-item"><strong>Eat the Frog:</strong> Complete your most challenging or important task first thing in the morning</div>
+          <div class="list-item"><strong>Digital Minimalism:</strong> Turn off notifications and schedule specific times to check email/messages</div>
+          <div class="list-item"><strong>Energy Management:</strong> Schedule demanding tasks during your peak energy hours</div>
+          <div class="list-item"><strong>Weekly Review:</strong> Set aside 30 minutes each week to review progress and plan ahead</div>
+        </div>
+        
+        <div class="suggestion-grid">
+          <div class="suggestion-item">
+            <div class="suggestion-emoji">📊</div>
+            <div class="suggestion-title">Eisenhower Matrix</div>
+            <div class="suggestion-desc">Organize tasks by urgency and importance to prioritize effectively</div>
+          </div>
+          <div class="suggestion-item">
+            <div class="suggestion-emoji">🧠</div>
+            <div class="suggestion-title">Mind Sweeping</div>
+            <div class="suggestion-desc">Write down everything on your mind to clear mental space and reduce cognitive load</div>
+          </div>
+          <div class="suggestion-item">
+            <div class="suggestion-emoji">⏱️</div>
+            <div class="suggestion-title">Timeboxing</div>
+            <div class="suggestion-desc">Assign fixed time periods to activities to create deadlines and prevent perfectionism</div>
+          </div>
+          <div class="suggestion-item">
+            <div class="suggestion-emoji">🌱</div>
+            <div class="suggestion-title">System Habits</div>
+            <div class="suggestion-desc">Focus on building systems rather than goals - what you do daily matters more than targets</div>
+          </div>
+        </div>
+        
+        Would you like me to suggest a productivity system that might work well for your specific challenges or work style?`;
+      }
+      
+      function generateResponse(input) {
+        const lowerInput = input.toLowerCase();
+        
+        // Weekly workout plan
+        if (lowerInput.includes('weekly') && 
+            (lowerInput.includes('workout') || lowerInput.includes('exercise') || lowerInput.includes('fitness'))) {
+          return generateWeeklyWorkout();
+        }
+        
+        // Daily routine plan
+        if (lowerInput.includes('routine') || lowerInput.includes('daily plan') || (lowerInput.includes('plan') && lowerInput.includes('day'))) {
+          return generateDailyRoutine();
+        }
+        
+        // Morning routine
+        if ((lowerInput.includes('morning') || lowerInput.includes('wake up')) && 
+            (lowerInput.includes('routine') || lowerInput.includes('ritual') || lowerInput.includes('idea'))) {
+          return generateMorningRoutine();
+        }
+        
+        // Food suggestions
+        if ((lowerInput.includes('food') || lowerInput.includes('meal') || lowerInput.includes('eat')) && 
+            (lowerInput.includes('suggest') || lowerInput.includes('recommend') || lowerInput.includes('healthy'))) {
+          return generateMealSuggestions();
+        }
+        
+        // Activity suggestions
+        if ((lowerInput.includes('activity') || lowerInput.includes('exercise') || lowerInput.includes('workout')) && 
+            (lowerInput.includes('suggest') || lowerInput.includes('recommend'))) {
+          return generateActivitySuggestions();
+        }
+        
+        // Email template
+        if (lowerInput.includes('email') && (lowerInput.includes('write') || lowerInput.includes('template') || lowerInput.includes('help'))) {
+          return generateEmailTemplate();
+        }
+        
+        // To-do list
+        if ((lowerInput.includes('to-do') || lowerInput.includes('todo') || lowerInput.includes('to do') || lowerInput.includes('task')) && 
+            (lowerInput.includes('list') || lowerInput.includes('template'))) {
+          return generateToDoTemplate();
+        }
+        
+        // Motivational quote
+        if ((lowerInput.includes('quote') || lowerInput.includes('motivation') || lowerInput.includes('inspire')) || 
+          (lowerInput.includes('tell') && lowerInput.includes('motivational'))) {
+          return generateMotivationalQuote();
+        }
+        
+        // Self-care tips
+        if ((lowerInput.includes('self') && lowerInput.includes('care')) || 
+            lowerInput.includes('stress') || lowerInput.includes('relax') || lowerInput.includes('anxiety')) {
+          return generateSelfCareTips();
+        }
+        
+        // Book recommendations
+        if (lowerInput.includes('book') && (lowerInput.includes('recommend') || lowerInput.includes('suggest') || lowerInput.includes('read'))) {
+          return generateBookRecommendations();
+        }
+        
+        // Productivity tips
+        if (lowerInput.includes('productive') || lowerInput.includes('productivity') || lowerInput.includes('focus') || 
+            (lowerInput.includes('time') && lowerInput.includes('management'))) {
+          return generateProductivityTips();
+        }
+        
+        // How was your day
+        if (lowerInput.includes('how') && (lowerInput.includes('day') || lowerInput.includes('doing'))) {
+          return "My day has been quite productive! I've been assisting people with planning, answering questions, and solving problems. Every interaction helps me learn and improve. How has your day been going? Is there anything specific I can help you with to make it better?";
+        }
+        
+        // Help/features query
+        if (lowerInput.includes('what can you do') || lowerInput.includes('help me with') || lowerInput.includes('features') || 
+            (lowerInput.includes('how') && lowerInput.includes('help'))) {
+          return "I can assist you with many things including: creating personalized daily routines, suggesting meal plans and recipes, providing workout recommendations, generating productivity tips, offering self-care suggestions, helping with email templates, creating to-do lists, recommending books, and offering motivational quotes. Just ask me about any of these topics, and I'll provide detailed assistance tailored to your needs!";
+        }
+        
+        // Greetings
+        if (lowerInput.match(/^(hello|hi|hey|greetings|good morning|good afternoon|good evening)($|\s)/)) {
+          const greetings = [
+            "Hello there! How can I assist you today?",
+            "Hi! I'm ready to help with whatever you need. What's on your mind?",
+            "Hey! I'm here and ready to assist. What can I help you with?",
+            "Greetings! How may I be of service today?",
+            "Hello! I'm excited to help you today. What would you like to know or discuss?"
+          ];
+          return greetings[Math.floor(Math.random() * greetings.length)];
+        }
+        
+        // Goodbyes
+        if (lowerInput.includes('bye') || lowerInput.includes('goodbye') || lowerInput.includes('see you')) {
+          return "Goodbye! It was a pleasure assisting you. Feel free to reach out whenever you need help again. Have a wonderful day!";
+        }
+        
+        // Name questions
+        if (lowerInput.includes('your name') || lowerInput.includes("who are you") || lowerInput.match(/^(what's|what is|whats) your name$/)) {
+          return "I'm Nexus, an advanced AI assistant designed to provide helpful, accurate, and thoughtful responses. I can assist with planning, information, creative tasks, and much more. How can I help you today?";
+        }
+        
+        // Thank you
+        if (lowerInput.includes('thank') || lowerInput.includes('thanks')) {
+          return "You're very welcome! I'm glad I could be of assistance. Is there anything else you'd like help with today?";
+        }
+        
+        // Feedback about the interface
+        if ((lowerInput.includes('interface') || lowerInput.includes('design') || lowerInput.includes('app')) && 
+            (lowerInput.includes('like') || lowerInput.includes('nice') || lowerInput.includes('great') || lowerInput.includes('cool'))) {
+          return "Thank you for the kind words about the interface! I'm designed to be both visually appealing and functional. The modern design includes features like dark mode, customizable settings, reactions, and easy navigation. Is there any particular feature you find most helpful, or anything you'd like to see improved?";
+        }
+        
+        // Dark mode inquiry
+        if (lowerInput.includes('dark mode') || (lowerInput.includes('dark') && lowerInput.includes('theme'))) {
+          return "Yes, this interface supports dark mode! You can toggle it by clicking the sun/moon icon in the header, or by using the keyboard shortcut Ctrl+D. Dark mode provides a more comfortable viewing experience in low-light environments and can help reduce eye strain. You can also customize other interface settings by clicking the settings icon.";
+        }
+        
+        // Settings question
+        if (lowerInput.includes('settings') || lowerInput.includes('customize') || 
+            (lowerInput.includes('change') && (lowerInput.includes('theme') || lowerInput.includes('font') || lowerInput.includes('size')))) {
+          return "You can access all interface settings by clicking the gear icon in the top-right corner. From there, you can toggle dark mode, enable or disable sound effects, adjust animation speeds, change font sizes, and learn about keyboard shortcuts. Your preferences will be saved automatically for future sessions. Is there a specific setting you'd like to adjust?";
+        }
+        
+        // Default responses with more personality
+        const defaultResponses = [
+          "That's an interesting topic. I'd love to explore that further with you. Could you share more about what specific aspects you're interested in?",
+          "I find that question intriguing. To provide the most helpful response, could you tell me a bit more about what you're looking to accomplish?",
+          "I'd be happy to assist with that. To give you the most relevant information, could you share any specific requirements or preferences you have?",
+          "That's something I can definitely help with. To personalize my response, could you tell me a bit more about your situation or goals?",
+          "I'm here to help with that. Would you like a comprehensive overview, or are you looking for specific information about a particular aspect?"
+        ];
+        
+        return defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
+      }
+      
+      // Randomly rotate suggestion chips
+      function rotateSuggestionChips() {
+        const allSuggestions = [
+          "How do I create a meal plan?",
+          "Morning routine ideas",
+          "Productivity tips",
+          "Best exercises for beginners",
+          "Recommend healthy snacks",
+          "How to reduce stress?",
+          "Tips for better sleep",
+          "Help me set fitness goals",
+          "Ideas for quick healthy meals",
+          "Recommend a meditation app",
+          "How to stay motivated?",
+          "Weekend activity ideas",
+          "Help with time management",
+          "How to drink more water?",
+          "What should I read next?",
+          "Create a daily schedule",
+          "How to improve focus?",
+          "Help me track habits",
+          "Mindfulness exercises",
+          "Effective goal setting"
+        ];
+        
+        // Select 5 random suggestions
+        const shuffled = [...allSuggestions].sort(() => 0.5 - Math.random());
+        const selected = shuffled.slice(0, 5);
+        
+        // Get current suggestions
+        const suggestions = document.querySelectorAll('.suggestion-chip');
+        
+        // Update the text content
+        suggestions.forEach((chip, index) => {
+          if (selected[index]) {
+            chip.textContent = selected[index];
+          }
+        });
+        
+        // Highlight the centered suggestion
+        setTimeout(highlightCenteredSuggestion, 100);
+      }
+      
+      // Variables for scrolling with inertia
+      let isScrolling = false;
+      let scrollStartX = 0;
+      let scrollLeft = 0;
+      let momentumID;
+      let velocity = 0;
+      const friction = 0.95;
+      
+      // Smooth scrolling with momentum for the suggestions container
+      inputSuggestionsContainer.addEventListener('wheel', function(e) {
+        if (e.deltaY !== 0) {
+          e.preventDefault();
+          
+          // Calculate how much to scroll - smoother and more responsive
+          const scrollAmount = e.deltaY * 0.5;
+          
+          // Use smooth scrolling behavior
+          this.scrollBy({
+            left: scrollAmount,
+            behavior: 'smooth'
+          });
+          
+          // Highlight the centered suggestion after scrolling completes
+          clearTimeout(momentumID);
+          momentumID = setTimeout(highlightCenteredSuggestion, 100);
+        }
+      });
+      
+      // Mouse-based momentum scrolling for suggestions
+      inputSuggestionsContainer.addEventListener('mousedown', function(e) {
+        isScrolling = true;
+        scrollStartX = e.pageX;
+        scrollLeft = inputSuggestionsContainer.scrollLeft;
+        clearTimeout(momentumID);
+        
+        // Set the container's style for smoother scrolling
+        inputSuggestionsContainer.style.scrollBehavior = 'auto';
+        
+        // Add event listeners for dragging
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+        
+        e.preventDefault();
+      });
+      
+      function onMouseMove(e) {
+        if (!isScrolling) return;
+        
+        const x = e.pageX;
+        const dragDistance = (scrollStartX - x) * 1.5; // Increased sensitivity
+        velocity = dragDistance * 0.1; // Calculate velocity based on drag distance
+        
+        inputSuggestionsContainer.scrollLeft = scrollLeft + dragDistance;
+      }
+      
+      function onMouseUp() {
+        isScrolling = false;
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+        
+        // Apply momentum scrolling
+        applyMomentum();
+        
+        // Restore smooth scrolling
+        setTimeout(() => {
+          inputSuggestionsContainer.style.scrollBehavior = 'smooth';
+        }, 300);
+      }
+      
+      function applyMomentum() {
+        if (Math.abs(velocity) < 0.5) {
+          highlightCenteredSuggestion();
+          return;
+        }
+        
+        inputSuggestionsContainer.scrollLeft += velocity;
+        velocity *= friction;
+        
+        momentumID = requestAnimationFrame(applyMomentum);
+      }
+      
+      // Function to highlight the centered suggestion
+      function highlightCenteredSuggestion() {
+        const containerRect = inputSuggestionsContainer.getBoundingClientRect();
+        const containerCenter = containerRect.left + containerRect.width / 2;
+        
+        let closestChip = null;
+        let closestDistance = Infinity;
+        
+        suggestionChips.forEach(chip => {
+          chip.classList.remove('active');
+          const chipRect = chip.getBoundingClientRect();
+          const chipCenter = chipRect.left + chipRect.width / 2;
+          const distance = Math.abs(containerCenter - chipCenter);
+          
+          if (distance < closestDistance) {
+            closestDistance = distance;
+            closestChip = chip;
+          }
+        });
+        
+        if (closestChip) {
+          closestChip.classList.add('active');
+          
+          // Optional: Auto-center the closest chip
+          if (closestDistance > 5) {
+            const chipRect = closestChip.getBoundingClientRect();
+            const chipCenter = chipRect.left + chipRect.width / 2;
+            const scrollAdjustment = chipCenter - containerCenter;
+            
+            inputSuggestionsContainer.scrollBy({
+              left: scrollAdjustment,
+              behavior: 'smooth'
+            });
+          }
+        }
+      }
+      
+      // Search functionality
+      searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        
+        if (searchTerm.trim() === '') {
+          // Reset search highlighting
+          document.querySelectorAll('.message').forEach(message => {
+            message.style.opacity = '1';
+            
+            const content = message.querySelector('.message-content');
+            content.innerHTML = content.innerHTML.replace(/<mark class="search-highlight">(.*?)<\/mark>/g, '$1');
+          });
+          return;
+        }
+        
+        // Filter and highlight messages
+        let found = false;
+        
+        document.querySelectorAll('.message').forEach(message => {
+          const content = message.querySelector('.message-content');
+          const text = content.textContent.toLowerCase();
+          
+          if (text.includes(searchTerm)) {
+            message.style.opacity = '1';
+            found = true;
+            
+            // Highlight matching text
+            let contentHtml = content.innerHTML;
+            const plainText = content.textContent;
+            
+            // Remove previous highlights
+            contentHtml = contentHtml.replace(/<mark class="search-highlight">(.*?)<\/mark>/g, '$1');
+            
+            // Add new highlights
+            const regex = new RegExp(searchTerm, 'gi');
+            const newContentHtml = plainText.replace(regex, match => `<mark class="search-highlight">${match}</mark>`);
+            
+            if (plainText !== newContentHtml) {
+              content.innerHTML = newContentHtml;
+            }
+            
+            // Scroll to first match
+            if (found) {
+              setTimeout(() => {
+                message.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }, 100);
+            }
+          } else {
+            message.style.opacity = '0.5';
+            
+            // Remove any highlighting
+            content.innerHTML = content.innerHTML.replace(/<mark class="search-highlight">(.*?)<\/mark>/g, '$1');
+          }
+        });
+        
+        if (!found && searchTerm.trim() !== '') {
+          showToast('Search results', 'No matches found for "' + searchTerm + '"', 'info');
+        }
+      });
+      
+      // Close search when pressing Escape
+      searchInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+          searchContainer.classList.remove('active');
+          searchInput.value = '';
+          
+          // Reset search highlighting
+          document.querySelectorAll('.message').forEach(message => {
+            message.style.opacity = '1';
+            
+            const content = message.querySelector('.message-content');
+            content.innerHTML = content.innerHTML.replace(/<mark class="search-highlight">(.*?)<\/mark>/g, '$1');
+          });
+        }
+      });
+      
+      // Close panels when clicking outside
+      document.addEventListener('click', function(e) {
+        if (!e.target.closest('#emoji-button') && !e.target.closest('#emoji-panel')) {
+          emojiPanel.classList.remove('active');
+        }
+        
+        // Hide emoji suggestions if clicking outside
+        if (!e.target.closest('.emoji-option') && !e.target.closest('#message-input')) {
+          emojiSuggestions.classList.remove('visible');
+        }
+        
+        // Close settings panel if clicking outside
+        if (!e.target.closest('#settings-panel') && !e.target.closest('#settings-button')) {
+          settingsPanel.classList.remove('active');
+        }
+      });
+      
+      // Also handle focus events for input
+      messageInput.addEventListener('focus', function() {
+        if (this.value.trim() === '') {
+          inputSuggestionsContainer.classList.remove('hidden');
+        }
+      });
+      
+      // Add initial animation to suggestion chips
+      setTimeout(() => {
+        suggestionChips.forEach(chip => {
+          chip.style.opacity = '1';
+          chip.style.transform = 'translateY(0)';
+        });
+      }, 200);
+      
+      // Rotate suggestions every 45 seconds
+      setInterval(rotateSuggestionChips, 45000);
+      
+      // Initialize by highlighting the centered suggestion
+      setTimeout(highlightCenteredSuggestion, 500);
+      
+      // Show welcome toast after a delay
+      setTimeout(() => {
+        showToast('Welcome to Nexus', 'Your advanced AI assistant is ready to help you', 'success');
+      }, 1500);
+    });
+  </script>
+</body>
+</html>  
