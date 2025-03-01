@@ -1998,6 +1998,124 @@
     body.dark-mode .settings-option:focus-visible {
       outline: 2px solid var(--dark-primary);
     }
+
+    /* New styles for settings panel */
+.custom-select {
+  appearance: none;
+  background: var(--light);
+  border: 1px solid var(--gray);
+  border-radius: 12px;
+  padding: 8px 12px;
+  font-size: 14px;
+  color: var(--text);
+  width: 150px;
+  position: relative;
+  transition: var(--transition);
+  cursor: pointer;
+  outline: none;
+}
+
+body.dark-mode .custom-select {
+  background: var(--dark-light);
+  border: 1px solid var(--dark-gray);
+  color: var(--dark-text);
+}
+
+.custom-select::after {
+  content: '▼';
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  pointer-events: none;
+  font-size: 10px;
+  color: var(--text-light);
+}
+
+body.dark-mode .custom-select::after {
+  color: var(--dark-text-light);
+}
+
+.custom-select:focus {
+  box-shadow: 0 0 0 2px rgba(123, 104, 238, 0.2);
+  border-color: var(--primary);
+}
+
+body.dark-mode .custom-select:focus {
+  box-shadow: 0 0 0 2px rgba(99, 85, 199, 0.2);
+  border-color: var(--dark-primary);
+}
+
+.clear-button, 
+.export-button {
+  background: var(--primary-gradient);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 8px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.clear-button:hover, 
+.export-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(123, 104, 238, 0.3);
+}
+
+body.dark-mode .clear-button, 
+body.dark-mode .export-button {
+  background: var(--dark-primary-gradient);
+}
+
+.clear-button:active, 
+.export-button:active {
+  transform: scale(0.95);
+}
+
+.clear-button svg, 
+.export-button svg {
+  margin-right: 6px;
+}
+
+/* Scrollbar for settings content */
+.settings-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.settings-content::-webkit-scrollbar-track {
+  background: var(--light);
+}
+
+body.dark-mode .settings-content::-webkit-scrollbar-track {
+  background: var(--dark-light);
+}
+
+.settings-content::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 10px;
+}
+
+body.dark-mode .settings-content::-webkit-scrollbar-thumb {
+  background: var(--dark-primary);
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .custom-select {
+    width: 100%;
+  }
+  
+  .clear-button, 
+  .export-button {
+    width: 100%;
+  }
+}
     
     /* Responsiveness */
     @media (max-width: 480px) {
@@ -2119,119 +2237,200 @@
       <!-- Messages will be added here -->
     </div>
     
-    <!-- Settings panel -->
-    <div class="settings-panel" id="settings-panel">
-      <div class="settings-header">
-        <div class="settings-title">Settings</div>
-        <div class="settings-close" id="settings-close" aria-label="Close settings">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
+   <!-- Settings panel -->
+<div class="settings-panel" id="settings-panel">
+  <div class="settings-header">
+    <div class="settings-title">Settings</div>
+    <div class="settings-close" id="settings-close" aria-label="Close settings">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </div>
+  </div>
+  <div class="settings-content">
+    <!-- Existing Theme Section -->
+    <div class="settings-section">
+      <div class="settings-section-title">Theme</div>
+      <div class="theme-options">
+        <div class="theme-option theme-light active" data-theme="light">
+          <div class="theme-preview">
+            <div class="theme-header"></div>
+            <div class="theme-body">
+              <div class="theme-message"></div>
+            </div>
+          </div>
+          <div class="theme-label">Light</div>
         </div>
-      </div>
-      <div class="settings-content">
-        <div class="settings-section">
-          <div class="settings-section-title">Theme</div>
-          <div class="theme-options">
-            <div class="theme-option theme-light active" data-theme="light">
-              <div class="theme-preview">
-                <div class="theme-header"></div>
-                <div class="theme-body">
-                  <div class="theme-message"></div>
-                </div>
-              </div>
-              <div class="theme-label">Light</div>
-            </div>
-            <div class="theme-option theme-dark" data-theme="dark">
-              <div class="theme-preview">
-                <div class="theme-header"></div>
-                <div class="theme-body">
-                  <div class="theme-message"></div>
-                </div>
-              </div>
-              <div class="theme-label">Dark</div>
+        <div class="theme-option theme-dark" data-theme="dark">
+          <div class="theme-preview">
+            <div class="theme-header"></div>
+            <div class="theme-body">
+              <div class="theme-message"></div>
             </div>
           </div>
-        </div>
-        
-        <div class="settings-section">
-          <div class="settings-section-title">Interface</div>
-          <div class="settings-option">
-            <div class="option-label">Enable sound effects</div>
-            <div class="option-toggle" id="sound-toggle">
-              <div class="toggle-handle"></div>
-            </div>
-          </div>
-          <div class="settings-option">
-            <div class="option-label">Show typing indicators</div>
-            <div class="option-toggle active" id="typing-toggle">
-              <div class="toggle-handle"></div>
-            </div>
-          </div>
-          <div class="settings-option">
-            <div class="option-label">Enable animations</div>
-            <div class="option-toggle active" id="animations-toggle">
-              <div class="toggle-handle"></div>
-            </div>
-          </div>
-        </div>
-        
-        <div class="settings-section">
-          <div class="settings-section-title">Animation Speed</div>
-          <div class="animation-slider" id="animation-slider">
-            <div class="slider-fill"></div>
-            <div class="slider-handle"></div>
-          </div>
-          <div class="slider-labels">
-            <span>Slower</span>
-            <span>Faster</span>
-          </div>
-        </div>
-        
-        <div class="settings-section">
-          <div class="settings-section-title">Font Size</div>
-          <div class="font-size-options">
-            <div class="font-size-btn" id="font-decrease">A-</div>
-            <div class="font-size-preview" id="font-preview">Default Text Size</div>
-            <div class="font-size-btn" id="font-increase">A+</div>
-          </div>
-        </div>
-        
-        <div class="settings-section">
-          <div class="settings-section-title">Keyboard Shortcuts</div>
-          <div class="help-shortcuts">
-            <div class="shortcut-item">
-              <div class="shortcut-keys">
-                <span class="key">Ctrl</span>
-                <span class="key">F</span>
-              </div>
-              <div class="shortcut-action">Search conversation</div>
-            </div>
-            <div class="shortcut-item">
-              <div class="shortcut-keys">
-                <span class="key">Ctrl</span>
-                <span class="key">D</span>
-              </div>
-              <div class="shortcut-action">Toggle dark mode</div>
-            </div>
-            <div class="shortcut-item">
-              <div class="shortcut-keys">
-                <span class="key">Ctrl</span>
-                <span class="key">S</span>
-              </div>
-              <div class="shortcut-action">Open settings</div>
-            </div>
-            <div class="shortcut-item">
-              <div class="shortcut-keys">
-                <span class="key">Esc</span>
-              </div>
-              <div class="shortcut-action">Close panels</div>
-            </div>
-          </div>
+          <div class="theme-label">Dark</div>
         </div>
       </div>
     </div>
+    
+    <!-- Existing Interface Section -->
+    <div class="settings-section">
+      <div class="settings-section-title">Interface</div>
+      <div class="settings-option">
+        <div class="option-label">Enable sound effects</div>
+        <div class="option-toggle" id="sound-toggle">
+          <div class="toggle-handle"></div>
+        </div>
+      </div>
+      <div class="settings-option">
+        <div class="option-label">Show typing indicators</div>
+        <div class="option-toggle active" id="typing-toggle">
+          <div class="toggle-handle"></div>
+        </div>
+      </div>
+      <div class="settings-option">
+        <div class="option-label">Enable animations</div>
+        <div class="option-toggle active" id="animations-toggle">
+          <div class="toggle-handle"></div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Existing Animation Speed Section -->
+    <div class="settings-section">
+      <div class="settings-section-title">Animation Speed</div>
+      <div class="animation-slider" id="animation-slider">
+        <div class="slider-fill"></div>
+        <div class="slider-handle"></div>
+      </div>
+      <div class="slider-labels">
+        <span>Slower</span>
+        <span>Faster</span>
+      </div>
+    </div>
+    
+    <!-- Existing Font Size Section -->
+    <div class="settings-section">
+      <div class="settings-section-title">Font Size</div>
+      <div class="font-size-options">
+        <div class="font-size-btn" id="font-decrease">A-</div>
+        <div class="font-size-preview" id="font-preview">Default Text Size</div>
+        <div class="font-size-btn" id="font-increase">A+</div>
+      </div>
+    </div>
+    
+    <!-- Existing Keyboard Shortcuts Section -->
+    <div class="settings-section">
+      <div class="settings-section-title">Keyboard Shortcuts</div>
+      <div class="help-shortcuts">
+        <div class="shortcut-item">
+          <div class="shortcut-keys">
+            <span class="key">Ctrl</span>
+            <span class="key">F</span>
+          </div>
+          <div class="shortcut-action">Search conversation</div>
+        </div>
+        <div class="shortcut-item">
+          <div class="shortcut-keys">
+            <span class="key">Ctrl</span>
+            <span class="key">D</span>
+          </div>
+          <div class="shortcut-action">Toggle dark mode</div>
+        </div>
+        <div class="shortcut-item">
+          <div class="shortcut-keys">
+            <span class="key">Ctrl</span>
+            <span class="key">S</span>
+          </div>
+          <div class="shortcut-action">Open settings</div>
+        </div>
+        <div class="shortcut-item">
+          <div class="shortcut-keys">
+            <span class="key">Esc</span>
+          </div>
+          <div class="shortcut-action">Close panels</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- New Notifications Section -->
+    <div class="settings-section">
+      <div class="settings-section-title">Notifications</div>
+      <div class="settings-option">
+        <div class="option-label">Enable notifications</div>
+        <div class="option-toggle" id="notifications-toggle">
+          <div class="toggle-handle"></div>
+        </div>
+      </div>
+      <div class="settings-option">
+        <div class="option-label">Sound alerts</div>
+        <div class="option-toggle" id="sound-alerts-toggle">
+          <div class="toggle-handle"></div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- New Chat Customization Section -->
+    <div class="settings-section">
+      <div class="settings-section-title">Chat Appearance</div>
+      <div class="settings-option">
+        <div class="option-label">Chat Background</div>
+        <select id="background-select" class="custom-select">
+          <option value="default">Default</option>
+          <option value="light-gradient">Light Gradient</option>
+          <option value="dark-gradient">Dark Gradient</option>
+          <option value="minimal">Minimal</option>
+        </select>
+      </div>
+      <div class="settings-option">
+        <div class="option-label">Auto-save conversation</div>
+        <div class="option-toggle" id="autosave-toggle">
+          <div class="toggle-handle"></div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- New Language & Accessibility Section -->
+    <div class="settings-section">
+      <div class="settings-section-title">Language & Accessibility</div>
+      <div class="settings-option">
+        <div class="option-label">Language</div>
+        <select id="language-select" class="custom-select">
+          <option value="en">English</option>
+          <option value="es">Español</option>
+          <option value="fr">Français</option>
+          <option value="de">Deutsch</option>
+        </select>
+      </div>
+      <div class="settings-option">
+        <div class="option-label">High contrast mode</div>
+        <div class="option-toggle" id="contrast-toggle">
+          <div class="toggle-handle"></div>
+        </div>
+      </div>
+      <div class="settings-option">
+        <div class="option-label">Screen reader support</div>
+        <div class="option-toggle" id="screenreader-toggle">
+          <div class="toggle-handle"></div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- New Privacy & Security Section -->
+    <div class="settings-section">
+      <div class="settings-section-title">Privacy & Security</div>
+      <div class="settings-option">
+        <div class="option-label">Clear conversation history</div>
+        <button id="clear-history-btn" class="clear-button">Clear</button>
+      </div>
+      <div class="settings-option">
+        <div class="option-label">Export conversation</div>
+        <button id="export-conversation-btn" class="export-button">Export</button>
+      </div>
+    </div>
+  </div>
+</div>
     
     <!-- Emoji panel with categories -->
     <div class="emoji-panel" id="emoji-panel">
@@ -2367,7 +2566,32 @@
       const themeOptions = document.querySelectorAll('.theme-option');
       const reactionContainer = document.getElementById('reaction-container');
       const toastContainer = document.getElementById('toast-container');
+      // Get references to new settings elements
+      const notificationsToggle = document.getElementById('notifications-toggle');
+      const soundAlertsToggle = document.getElementById('sound-alerts-toggle');
+      const autoSaveToggle = document.getElementById('autosave-toggle');
+      const backgroundSelect = document.getElementById('background-select');
+      const languageSelect = document.getElementById('language-select');
+      const highContrastToggle = document.getElementById('contrast-toggle');
+      const screenReaderToggle = document.getElementById('screenreader-toggle');
+      const clearHistoryBtn = document.getElementById('clear-history-btn');
+      const exportConversationBtn = document.getElementById('export-conversation-btn');
+      const newChatButton = document.getElementById('new-chat-button');
+      const dropdownContent = document.getElementById('dropdown-content');
+      const newChatOption = document.getElementById('new-chat-option');
+      const previousChatsOption = document.getElementById('previous-chats-option');
+      const conversationModal = document.getElementById('conversation-modal');
+      const conversationClose = document.getElementById('conversation-close');
+      const conversationList = document.getElementById('conversation-list');
       
+      // New settings sections and variables
+      let isNotificationsEnabled = true;
+      let isAutoSaveEnabled = false;
+      let chatBackground = 'default';
+      let languagePreference = 'en';
+      let isHighContrastMode = false;
+      let isScreenReaderSupport = false;
+
       // State variables
       let isRecording = false;
       let currentReactionMessage = null;
@@ -2379,6 +2603,8 @@
       let isTypingEnabled = true;
       let currentTheme = 'light';
       let animationSpeed = 1;
+
+      let autoSaveInterval = null;
       
       // Emoji categories
       const emojiCategories = {
@@ -2581,6 +2807,151 @@
         localStorage.setItem('nexus-animations', isAnimationsEnabled);
         if (isSoundEnabled) sounds.toggle.play();
       });
+
+       // New high contrast toggle
+  highContrastToggle.addEventListener('click', function() {
+    isHighContrastMode = !isHighContrastMode;
+    this.classList.toggle('active', isHighContrastMode);
+    localStorage.setItem('nexus-high-contrast', isHighContrastMode);
+    applyHighContrastMode(isHighContrastMode);
+    
+    (
+      'High Contrast', 
+      isHighContrastMode ? 'High contrast mode enabled' : 'High contrast mode disabled', 
+      'info'
+    );
+  });
+
+  // Screen reader support toggle
+  screenReaderToggle.addEventListener('click', function() {
+    isScreenReaderSupport = !isScreenReaderSupport;
+    this.classList.toggle('active', isScreenReaderSupport);
+    localStorage.setItem('nexus-screen-reader', isScreenReaderSupport);
+    applyScreenReaderSupport(isScreenReaderSupport);
+    
+    (
+      'Screen Reader', 
+      isScreenReaderSupport ? 'Screen reader support enabled' : 'Screen reader support disabled', 
+      'info'
+    );
+  });
+
+  notificationsToggle.addEventListener('click', function() {
+    isNotificationsEnabled = !isNotificationsEnabled;
+    this.classList.toggle('active', isNotificationsEnabled);
+    localStorage.setItem('nexus-notifications', isNotificationsEnabled);
+    
+    if (isSoundEnabled) sounds.toggle.play();
+    
+
+    // Request permission if enabling notifications
+    if (isNotificationsEnabled && "Notification" in window) {
+      Notification.requestPermission();
+    }
+  });
+
+   soundAlertsToggle.addEventListener('click', function() {
+    const isSoundAlertsEnabled = !this.classList.contains('active');
+    this.classList.toggle('active');
+    localStorage.setItem('nexus-sound-alerts', isSoundAlertsEnabled);
+    
+    if (isSoundEnabled) sounds.toggle.play();
+    
+    showToast(
+      'Sound Alerts', 
+      isSoundAlertsEnabled ? 'Sound alerts enabled' : 'Sound alerts disabled', 
+      'info'
+    );
+  });
+
+  autoSaveToggle.addEventListener('click', function() {
+    isAutoSaveEnabled = !isAutoSaveEnabled;
+    this.classList.toggle('active', isAutoSaveEnabled);
+    localStorage.setItem('nexus-autosave', isAutoSaveEnabled);
+    
+    if (isSoundEnabled) sounds.toggle.play();
+    
+    
+    // Set up auto-save interval if enabled
+    if (isAutoSaveEnabled) {
+      autoSaveInterval = setInterval(saveConversation, 60000); // Save every minute
+    } else if (autoSaveInterval) {
+      clearInterval(autoSaveInterval);
+    }
+  });
+
+  backgroundSelect.addEventListener('change', function() {
+    chatBackground = this.value;
+    localStorage.setItem('nexus-background', chatBackground);
+    applyBackgroundStyle(chatBackground);
+    
+    if (isSoundEnabled) sounds.toggle.play();
+    
+    
+      'Background Changed', 
+      `Chat background set to ${chatBackground}`, 
+      'info'
+    
+  });
+
+  languageSelect.addEventListener('change', function() {
+    languagePreference = this.value;
+    localStorage.setItem('nexus-language', languagePreference);
+    
+    if (isSoundEnabled) sounds.toggle.play();
+    
+    showToast(
+      'Language Preference', 
+      `Language set to ${getLanguageName(languagePreference)}`, 
+      'info'
+    );
+    
+    // Translate interface elements based on language selection
+    translateInterface(languagePreference);
+  });
+ 
+
+  // Clear history button
+  clearHistoryBtn.addEventListener('click', function() {
+    const confirmed = confirm('Are you sure you want to clear all conversation history? This cannot be undone.');
+    
+    if (confirmed) {
+      // Clear chat messages
+      const chatMessages = document.getElementById('chat-messages');
+      chatMessages.innerHTML = '';
+      
+      // Re-add date divider
+      const dateDivider = document.createElement('div');
+      dateDivider.classList.add('date-divider');
+      dateDivider.innerHTML = '<span>Today</span>';
+      chatMessages.appendChild(dateDivider);
+      
+      // Add welcome message again
+      addMessage('Hello! I\'m Nexus, your advanced AI assistant. I can help with daily routines, meal planning, activity suggestions, and much more. How can I assist you today?', 'incoming');
+      
+      showToast('History Cleared', 'All conversation history has been deleted', 'success');
+    }
+  });
+
+  // Export conversation button
+  exportConversationBtn.addEventListener('click', function() {
+    const messages = document.querySelectorAll('.message-content');
+    const conversationText = Array.from(messages)
+      .map(msg => msg.textContent)
+      .join('\n\n');
+    
+    const blob = new Blob([conversationText], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `nexus-conversation-${new Date().toISOString().split('T')[0]}.txt`;
+    a.click();
+    
+    URL.revokeObjectURL(url);
+    
+    ('Conversation Exported', 'Conversation saved as text file', 'success');
+  });
       
       // Font size controls
       fontDecrease.addEventListener('click', function() {
@@ -2732,7 +3103,16 @@
       
       // Initialize from saved preferences
       initializePreferences();
-      
+      loadSavedSettings();
+
+// Check for and load saved conversation on startup
+if (localStorage.getItem('nexus-autosave') === 'true') {
+    loadSavedConversation();
+    // Set up auto-save interval
+    autoSaveInterval = setInterval(saveConversation, 60000); // Save every minute
+}
+
+
       // Functions
       
       function initializePreferences() {
@@ -2744,6 +3124,10 @@
           document.querySelector('.theme-dark').classList.add('active');
           document.querySelector('.theme-light').classList.remove('active');
         }
+
+          // Notifications
+    isNotificationsEnabled = localStorage.getItem('nexus-notifications') !== 'false';
+    notificationsToggle.classList.toggle('active', isNotificationsEnabled);
         
         // Sound
         isSoundEnabled = localStorage.getItem('nexus-sound') === 'true';
@@ -2781,6 +3165,56 @@
         fontSizePercent = parseInt(localStorage.getItem('nexus-font-size')) || 100;
         updateFontSize();
       }
+
+      // New loadSavedSettings function
+  function loadSavedSettings() {
+    // Notifications
+    isNotificationsEnabled = localStorage.getItem('nexus-notifications') !== 'false';
+    notificationsToggle.classList.toggle('active', isNotificationsEnabled);
+
+    // Sound Alerts
+    isSoundAlertsEnabled = localStorage.getItem('nexus-sound-alerts') !== 'false';
+    soundAlertsToggle.classList.toggle('active', isSoundAlertsEnabled);
+
+    // Auto-save
+    isAutoSaveEnabled = localStorage.getItem('nexus-autosave') === 'true';
+    autoSaveToggle.classList.toggle('active', isAutoSaveEnabled);
+
+    // Background
+    chatBackground = localStorage.getItem('nexus-background') || 'default';
+    backgroundSelect.value = chatBackground;
+    applyBackgroundStyle(chatBackground);
+
+    // Language
+    languagePreference = localStorage.getItem('nexus-language') || 'en';
+    languageSelect.value = languagePreference;
+
+    // High Contrast Mode
+    isHighContrastMode = localStorage.getItem('nexus-high-contrast') === 'true';
+    highContrastToggle.classList.toggle('active', isHighContrastMode);
+    applyHighContrastMode(isHighContrastMode);
+
+    // Screen Reader Support
+    isScreenReaderSupport = localStorage.getItem('nexus-screen-reader') === 'true';
+    screenReaderToggle.classList.toggle('active', isScreenReaderSupport);
+    applyScreenReaderSupport(isScreenReaderSupport);
+  }
+
+  // STEP 6: Add the function to apply background style
+  function applyBackgroundStyle(style) {
+    const chatContainer = document.querySelector('.chat-container');
+    
+    // Remove existing background classes
+    chatContainer.classList.remove(
+      'background-default', 
+      'background-light-gradient', 
+      'background-dark-gradient', 
+      'background-minimal'
+    );
+    
+    // Add new background class
+    chatContainer.classList.add(`background-${style}`);
+  }
       
       function updateFontSize() {
         document.documentElement.style.setProperty('--font-size-factor', fontSizePercent / 100);
@@ -2796,7 +3230,254 @@
         
         localStorage.setItem('nexus-font-size', fontSizePercent);
       }
+
+ // STEP 7: Add the function to apply high contrast mode
+  function applyHighContrastMode(enable) {
+    document.body.classList.toggle('high-contrast', enable);
+    
+    if (enable) {
+      // Store original values if not already stored
+      if (!document.documentElement.style.getPropertyValue('--original-text')) {
+        document.documentElement.style.setProperty('--original-text', 
+          getComputedStyle(document.documentElement).getPropertyValue('--text'));
+        document.documentElement.style.setProperty('--original-background', 
+          getComputedStyle(document.documentElement).getPropertyValue('--background'));
+        document.documentElement.style.setProperty('--original-primary', 
+          getComputedStyle(document.documentElement).getPropertyValue('--primary'));
+      }
       
+      // Apply high contrast colors
+      document.documentElement.style.setProperty('--text', '#000000');
+      document.documentElement.style.setProperty('--background', '#ffffff');
+      document.documentElement.style.setProperty('--primary', '#0000FF');
+      document.documentElement.style.setProperty('--card-bg', '#ffffff');
+      document.documentElement.style.setProperty('--border', '#000000');
+      document.documentElement.style.setProperty('--message-incoming', '#ffffff');
+      document.documentElement.style.setProperty('--message-outgoing', '#e7f3ff');
+    } else {
+      // Restore original colors
+      document.documentElement.style.setProperty('--text', 
+        document.documentElement.style.getPropertyValue('--original-text') || '');
+      document.documentElement.style.setProperty('--background', 
+        document.documentElement.style.getPropertyValue('--original-background') || '');
+      document.documentElement.style.setProperty('--primary', 
+        document.documentElement.style.getPropertyValue('--original-primary') || '');
+      document.documentElement.style.removeProperty('--card-bg');
+      document.documentElement.style.removeProperty('--border');
+      document.documentElement.style.removeProperty('--message-incoming');
+      document.documentElement.style.removeProperty('--message-outgoing');
+    }
+  }
+
+  // STEP 8: Add the function to apply screen reader support
+  function applyScreenReaderSupport(enable) {
+    // Add ARIA attributes to important elements
+    const elements = {
+      'chat-messages': { role: 'log', label: 'Conversation messages' },
+      'message-input': { role: 'textbox', label: 'Type your message here' },
+      'send-button': { role: 'button', label: 'Send message' },
+      'emoji-button': { role: 'button', label: 'Open emoji panel' },
+      'voice-button': { role: 'button', label: 'Voice input' },
+      'search-button': { role: 'button', label: 'Search conversations' },
+      'settings-button': { role: 'button', label: 'Open settings' }
+    };
+    
+    if (enable) {
+      // Apply ARIA attributes
+      for (const [id, attrs] of Object.entries(elements)) {
+        const element = document.getElementById(id);
+        if (element) {
+          element.setAttribute('role', attrs.role);
+          element.setAttribute('aria-label', attrs.label);
+        }
+      }
+      
+      // Add additional accessibility enhancements
+      document.querySelectorAll('.message').forEach((msg, index) => {
+        msg.setAttribute('role', 'article');
+        msg.setAttribute('aria-label', `Message ${index + 1}`);
+      });
+      
+      // Announce new messages
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+            mutation.addedNodes.forEach(node => {
+              if (node.classList && node.classList.contains('message')) {
+                const isOutgoing = node.classList.contains('message-outgoing');
+                const content = node.querySelector('.message-content')?.textContent || '';
+                
+                // Create an announcement for screen readers
+                const announcement = document.createElement('div');
+                announcement.className = 'sr-only';
+                announcement.setAttribute('role', 'alert');
+                announcement.textContent = `New ${isOutgoing ? 'outgoing' : 'incoming'} message: ${content}`;
+                document.body.appendChild(announcement);
+                
+                // Remove after it's been announced
+                setTimeout(() => announcement.remove(), 1000);
+              }
+            });
+          }
+        });
+      });
+      
+      observer.observe(chatMessages, { childList: true });
+      window.accessibilityObserver = observer;
+    } else {
+      // Remove ARIA attributes
+      for (const [id, attrs] of Object.entries(elements)) {
+        const element = document.getElementById(id);
+        if (element) {
+          element.removeAttribute('role');
+          element.removeAttribute('aria-label');
+        }
+      }
+      
+      document.querySelectorAll('.message').forEach(msg => {
+        msg.removeAttribute('role');
+        msg.removeAttribute('aria-label');
+      });
+      
+      // Disconnect observer if it exists
+      if (window.accessibilityObserver) {
+        window.accessibilityObserver.disconnect();
+        window.accessibilityObserver = null;
+      }
+    }
+    
+    // Add or remove the accessibility stylesheet
+    let accessibilityStyle = document.getElementById('accessibility-styles');
+    
+    if (enable && !accessibilityStyle) {
+      accessibilityStyle = document.createElement('style');
+      accessibilityStyle.id = 'accessibility-styles';
+      accessibilityStyle.textContent = `
+        :focus {
+          outline: 3px solid #2196F3 !important;
+          outline-offset: 2px !important;
+        }
+        .sr-only {
+          position: absolute;
+          width: 1px;
+          height: 1px;
+          padding: 0;
+          margin: -1px;
+          overflow: hidden;
+          clip: rect(0, 0, 0, 0);
+          white-space: nowrap;
+          border-width: 0;
+        }
+      `;
+      document.head.appendChild(accessibilityStyle);
+    } else if (!enable && accessibilityStyle) {
+      accessibilityStyle.remove();
+    }
+  }
+
+  // STEP 9: Add functions for auto-save functionality
+  function saveConversation() {
+    if (!isAutoSaveEnabled) return;
+    
+    const messages = document.querySelectorAll('.message');
+    const conversationData = Array.from(messages).map(msg => {
+      const content = msg.querySelector('.message-content').textContent;
+      const time = msg.querySelector('.message-time').textContent;
+      const isOutgoing = msg.classList.contains('message-outgoing');
+      
+      return {
+        content,
+        time,
+        isOutgoing
+      };
+    });
+    
+    localStorage.setItem('nexus-saved-conversation', JSON.stringify(conversationData));
+    
+    // Optional: Show a subtle indicator that the conversation was saved
+    const saveIndicator = document.createElement('div');
+    saveIndicator.classList.add('save-indicator');
+    saveIndicator.textContent = 'Conversation saved';
+    document.body.appendChild(saveIndicator);
+    
+    setTimeout(() => {
+      saveIndicator.classList.add('fade-out');
+      setTimeout(() => saveIndicator.remove(), 500);
+    }, 2000);
+  }
+
+   function loadSavedConversation() {
+    if (!isAutoSaveEnabled) return;
+    
+    const savedData = localStorage.getItem('nexus-saved-conversation');
+    if (!savedData) return;
+    
+    try {
+      const conversationData = JSON.parse(savedData);
+      
+      // Clear current messages except for the date divider
+      chatMessages.innerHTML = '';
+      const dateDivider = document.createElement('div');
+      dateDivider.classList.add('date-divider');
+      dateDivider.innerHTML = '<span>Today</span>';
+      chatMessages.appendChild(dateDivider);
+      
+      // Restore saved messages
+      conversationData.forEach(msgData => {
+        addMessage(msgData.content, msgData.isOutgoing ? 'outgoing' : 'incoming');
+      });
+      
+      showToast('Conversation Loaded', 'Previous conversation restored', 'success');
+    } catch (error) {
+      console.error('Error loading saved conversation:', error);
+    }
+  }
+
+  // STEP 10: Add function for interface translation
+  function translateInterface(language) {
+    // This is a simplified translation function
+    // In a real app, you would use a more comprehensive translation system
+    
+    const translations = {
+      'en': {
+        'settingsTitle': 'Settings',
+        'themeLabel': 'Theme',
+        'soundLabel': 'Sound Effects',
+        'typingLabel': 'Typing Indicator',
+        'animationsLabel': 'Animations',
+        'fontSizeLabel': 'Font Size'
+      },
+      'es': {
+        'settingsTitle': 'Configuración',
+        'themeLabel': 'Tema',
+        'soundLabel': 'Efectos de Sonido',
+        'typingLabel': 'Indicador de Escritura',
+        'animationsLabel': 'Animaciones',
+        'fontSizeLabel': 'Tamaño de Fuente'
+      },
+      'fr': {
+        'settingsTitle': 'Paramètres',
+        'themeLabel': 'Thème',
+        'soundLabel': 'Effets Sonores',
+        'typingLabel': 'Indicateur de Frappe',
+        'animationsLabel': 'Animations',
+        'fontSizeLabel': 'Taille de Police'
+      }
+      // Add more languages as needed
+    };
+
+    // Default to English if the requested language isn't available
+    const currentTranslation = translations[language] || translations['en'];
+    
+    // Apply translations
+    document.querySelector('.settings-header').textContent = currentTranslation.settingsTitle;
+    document.querySelector('label[for="theme-toggle"]').textContent = currentTranslation.themeLabel;
+    document.querySelector('label[for="sound-toggle"]').textContent = currentTranslation.soundLabel;
+    document.querySelector('label[for="typing-toggle"]').textContent = currentTranslation.typingLabel;
+    document.querySelector('label[for="animations-toggle"]').textContent = currentTranslation.animationsLabel;
+    document.querySelector('.font-size-label').textContent = currentTranslation.fontSizeLabel;
+  }
+     
       function toggleVoiceRecording() {
         if (isRecording) {
           stopVoiceRecording(false);
@@ -4054,7 +4735,7 @@
       
       // Show welcome toast after a delay
       setTimeout(() => {
-        showToast('Welcome to Nexus', 'Your advanced AI assistant is ready to help you', 'success');
+        ('Welcome to Nexus', 'Your advanced AI assistant is ready to help you', 'success');
       }, 1500);
     });
   </script>
