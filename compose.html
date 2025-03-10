@@ -1,0 +1,1614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enhanced Email Composer</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: #f5f5f5;
+      position: relative;
+      height: 100vh;
+      overflow: hidden;
+      color: #333;
+    }
+
+    .compose-button {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 65px;
+      height: 65px;
+      background-color: #1a73e8;
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
+      cursor: pointer;
+      z-index: 100;
+      transition: all 0.3s ease;
+    }
+
+    .compose-button:hover {
+      transform: scale(1.08);
+      background-color: #0d62d1;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+    }
+
+    .compose-button svg {
+      transition: transform 0.3s ease;
+    }
+
+    .compose-button:hover svg {
+      transform: rotate(15deg);
+    }
+
+    .composer-container {
+      position: fixed;
+      bottom: -100%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90%;
+      max-width: 800px;
+      height: 85%;
+      background-color: white;
+      border-top-left-radius: 20px;
+      border-top-right-radius: 20px;
+      box-shadow: 0 -5px 25px rgba(0, 0, 0, 0.2);
+      transition: bottom 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      z-index: 90;
+      padding: 25px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .composer-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #eaeaea;
+    }
+
+    .composer-title {
+      font-size: 1.5rem;
+      font-weight: 500;
+      color: #1a73e8;
+    }
+
+    .close-button {
+      background: none;
+      border: none;
+      font-size: 28px;
+      cursor: pointer;
+      color: #666;
+      transition: color 0.2s;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+    }
+
+    .close-button:hover {
+      color: #1a73e8;
+      background-color: #f0f7ff;
+    }
+
+    .input-field {
+      position: relative;
+      margin-bottom: 15px;
+    }
+
+    .input-field input {
+      width: 100%;
+      padding: 12px 15px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    .input-field input:focus {
+      border-color: #1a73e8;
+      box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
+      outline: none;
+    }
+
+    .input-field label {
+      position: absolute;
+      left: 10px;
+      top: -10px;
+      background-color: white;
+      padding: 0 5px;
+      font-size: 0.85rem;
+      color: #666;
+      transition: color 0.3s;
+    }
+
+    .input-field input:focus + label {
+      color: #1a73e8;
+    }
+
+    .cc-bcc-buttons {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .cc-bcc-button {
+      background: none;
+      border: none;
+      color: #1a73e8;
+      font-size: 0.9rem;
+      cursor: pointer;
+      padding: 5px;
+      border-radius: 4px;
+      transition: background-color 0.2s;
+    }
+
+    .cc-bcc-button:hover {
+      background-color: #f0f7ff;
+    }
+
+    .email-content-container {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    .email-content {
+      flex-grow: 1;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 15px;
+      font-size: 1rem;
+      resize: none;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    .email-content:focus {
+      border-color: #1a73e8;
+      box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
+      outline: none;
+    }
+
+    .formatting-toolbar {
+      display: flex;
+      gap: 5px;
+      padding: 10px 0;
+      overflow-x: auto;
+      margin-bottom: 10px;
+      border-bottom: 1px solid #eaeaea;
+    }
+
+    .format-button {
+      background: none;
+      border: none;
+      padding: 8px 10px;
+      cursor: pointer;
+      border-radius: 5px;
+      transition: background-color 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #555;
+    }
+
+    .format-button:hover {
+      background-color: #f0f0f0;
+    }
+
+    .format-button svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .style-toolbar {
+      display: flex;
+      gap: 15px;
+      padding: 15px 0;
+      border-top: 1px solid #eaeaea;
+      flex-wrap: wrap;
+    }
+
+    .style-button {
+      padding: 10px 18px;
+      border: none;
+      border-radius: 25px;
+      background-color: #f5f5f5;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #555;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      opacity: 0.7;
+    }
+
+    .style-button:hover:not([disabled]) {
+      background-color: #e8e8e8;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .style-button.active {
+      background-color: #1a73e8;
+      color: white;
+      opacity: 1;
+    }
+
+    .style-button[disabled] {
+      cursor: not-allowed;
+      opacity: 0.5;
+      background-color: #f0f0f0;
+    }
+
+    .style-button svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .rainbow-text {
+      animation: rainbow-wave 3s linear, text-wave 3s ease-in-out;
+      display: inline-block;
+    }
+
+    @keyframes rainbow-wave {
+      0% { color: #ff595e; }
+      16% { color: #ffca3a; }
+      33% { color: #8ac926; }
+      50% { color: #1982c4; }
+      66% { color: #6a4c93; }
+      83% { color: #e63946; }
+      100% { color: #ff595e; }
+    }
+
+    @keyframes text-wave {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      25% { transform: translateY(-5px) rotate(1deg); }
+      50% { transform: translateY(0) rotate(0deg); }
+      75% { transform: translateY(5px) rotate(-1deg); }
+    }
+
+    .composer-show {
+      bottom: 0;
+    }
+
+    .action-buttons {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .action-left {
+      display: flex;
+      gap: 10px;
+    }
+
+    .action-button {
+      padding: 8px;
+      background: none;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.2s;
+      color: #555;
+    }
+
+    .action-button:hover {
+      background-color: #f0f0f0;
+    }
+
+    .action-button svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .send-button {
+      padding: 12px 25px 12px 20px;
+      background-color: #1a73e8;
+      color: white;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s;
+      box-shadow: 0 2px 5px rgba(26, 115, 232, 0.3);
+    }
+
+    .send-button svg {
+      width: 18px;
+      height: 18px;
+      transition: transform 0.3s;
+    }
+
+    .send-button:hover {
+      background-color: #0d62d1;
+      box-shadow: 0 4px 8px rgba(26, 115, 232, 0.4);
+    }
+
+    .send-button:hover svg {
+      transform: translateX(3px);
+    }
+
+    .toast-notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 15px 20px;
+      background-color: #333;
+      color: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      z-index: 1000;
+      opacity: 0;
+      transform: translateY(-20px);
+      transition: opacity 0.3s, transform 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .toast-notification.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .toast-notification.success {
+      background-color: #4caf50;
+    }
+
+    .toast-notification.warning {
+      background-color: #ff9800;
+    }
+
+    .toast-notification.error {
+      background-color: #f44336;
+    }
+
+    .attachment-area {
+      border: 2px dashed #ddd;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 15px;
+      display: none;
+      background-color: #fafafa;
+    }
+
+    .attachment-area.active {
+      display: block;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .attachment-text {
+      text-align: center;
+      color: #777;
+      margin-bottom: 10px;
+    }
+
+    .attachment-button {
+      display: block;
+      width: 180px;
+      margin: 0 auto;
+      padding: 8px 15px;
+      background-color: #f5f5f5;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      cursor: pointer;
+      text-align: center;
+      transition: background-color 0.2s;
+    }
+
+    .attachment-button:hover {
+      background-color: #e8e8e8;
+    }
+
+    .character-count {
+      position: absolute;
+      bottom: -25px;
+      right: 0;
+      font-size: 0.85rem;
+      color: #777;
+    }
+
+    .red-count {
+      color: #f44336;
+    }
+
+    .schedule-options {
+      display: none;
+      position: absolute;
+      bottom: 60px;
+      right: 0;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      padding: 15px;
+      width: 250px;
+      z-index: 100;
+      animation: fadeIn 0.2s;
+    }
+
+    .schedule-options.active {
+      display: block;
+    }
+
+    .schedule-title {
+      font-weight: 500;
+      margin-bottom: 10px;
+      color: #333;
+    }
+
+    .schedule-input {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+
+    .schedule-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    .schedule-button {
+      padding: 8px 12px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .confirm-schedule {
+      background-color: #1a73e8;
+      color: white;
+    }
+
+    .cancel-schedule {
+      background-color: #f5f5f5;
+      color: #333;
+    }
+    
+    .typing-indicator {
+      display: none;
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      font-size: 0.85rem;
+      color: #1a73e8;
+      font-style: italic;
+    }
+    
+    .typing-indicator.active {
+      display: block;
+    }
+    
+    /* Dark mode toggle */
+    .dark-mode-toggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: none;
+      border: none;
+      color: #555;
+      font-size: 24px;
+      cursor: pointer;
+      z-index: 101;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: background-color 0.2s;
+    }
+    
+    .dark-mode-toggle:hover {
+      background-color: rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Dark mode */
+    body.dark-mode {
+      background-color: #121212;
+      color: #e0e0e0;
+    }
+    
+    body.dark-mode .composer-container {
+      background-color: #1e1e1e;
+      box-shadow: 0 -5px 25px rgba(0, 0, 0, 0.5);
+    }
+    
+    body.dark-mode .composer-header {
+      border-bottom-color: #333;
+    }
+    
+    body.dark-mode .composer-title {
+      color: #4a9bff;
+    }
+    
+    body.dark-mode .close-button {
+      color: #b0b0b0;
+    }
+    
+    body.dark-mode .close-button:hover {
+      color: #4a9bff;
+      background-color: rgba(74, 155, 255, 0.1);
+    }
+    
+    body.dark-mode .input-field input,
+    body.dark-mode .email-content {
+      background-color: #2d2d2d;
+      border-color: #444;
+      color: #e0e0e0;
+    }
+    
+    body.dark-mode .input-field label {
+      background-color: #1e1e1e;
+      color: #b0b0b0;
+    }
+    
+    body.dark-mode .style-button {
+      background-color: #333;
+      color: #e0e0e0;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    }
+    
+    body.dark-mode .style-button:hover:not([disabled]) {
+      background-color: #444;
+    }
+    
+    body.dark-mode .style-button.active {
+      background-color: #4a9bff;
+    }
+    
+    body.dark-mode .style-button[disabled] {
+      background-color: #2a2a2a;
+    }
+    
+    body.dark-mode .formatting-toolbar,
+    body.dark-mode .style-toolbar {
+      border-color: #333;
+    }
+    
+    body.dark-mode .format-button {
+      color: #b0b0b0;
+    }
+    
+    body.dark-mode .format-button:hover {
+      background-color: #333;
+    }
+    
+    body.dark-mode .action-button {
+      color: #b0b0b0;
+    }
+    
+    body.dark-mode .action-button:hover {
+      background-color: #333;
+    }
+    
+    body.dark-mode .attachment-area {
+      background-color: #2a2a2a;
+      border-color: #444;
+    }
+    
+    body.dark-mode .attachment-text {
+      color: #b0b0b0;
+    }
+    
+    body.dark-mode .attachment-button {
+      background-color: #333;
+      border-color: #444;
+      color: #e0e0e0;
+    }
+    
+    body.dark-mode .attachment-button:hover {
+      background-color: #444;
+    }
+    
+    body.dark-mode .schedule-options {
+      background-color: #2d2d2d;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+    
+    body.dark-mode .schedule-input {
+      background-color: #333;
+      border-color: #444;
+      color: #e0e0e0;
+    }
+    
+    body.dark-mode .cancel-schedule {
+      background-color: #333;
+      color: #e0e0e0;
+    }
+    
+    body.dark-mode .dark-mode-toggle {
+      color: #e0e0e0;
+    }
+    
+    body.dark-mode .dark-mode-toggle:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    /* New tone buttons styling */
+    .tone-button {
+      padding: 10px 18px;
+      border: none;
+      border-radius: 25px;
+      background-color: #f5f5f5;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #555;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      opacity: 0.7;
+    }
+
+    .tone-button:hover:not([disabled]) {
+      background-color: #e8e8e8;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .tone-dropdown {
+      position: relative;
+      display: inline-block;
+    }
+
+    .tone-dropdown-content {
+      display: none;
+      position: absolute;
+      top: 110%;
+      left: 0;
+      background-color: white;
+      min-width: 160px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      border-radius: 8px;
+      z-index: 110;
+      padding: 10px 0;
+    }
+
+    .tone-dropdown-content.show {
+      display: block;
+      animation: fadeIn 0.2s;
+    }
+
+    .tone-option {
+      padding: 8px 15px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .tone-option:hover {
+      background-color: #f5f5f5;
+    }
+
+    .tone-option.active {
+      background-color: #f0f7ff;
+      color: #1a73e8;
+    }
+
+    /* Template system */
+    .template-area {
+      display: none;
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 90%;
+      max-width: 700px;
+      height: 80%;
+      z-index: 120;
+      padding: 20px;
+      animation: fadeIn 0.3s;
+      overflow-y: auto;
+    }
+
+    .template-area.active {
+      display: block;
+    }
+
+    .template-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #eaeaea;
+    }
+
+    .template-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 15px;
+    }
+
+    .template-card {
+      border: 1px solid #eaeaea;
+      border-radius: 8px;
+      padding: 15px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .template-card:hover {
+      border-color: #1a73e8;
+      background-color: #f0f7ff;
+      transform: translateY(-3px);
+      box-shadow: 0 4px 8px rgba(26, 115, 232, 0.1);
+    }
+
+    .template-title {
+      font-weight: 500;
+      margin-bottom: 8px;
+      color: #1a73e8;
+    }
+
+    .template-preview {
+      font-size: 0.85rem;
+      color: #777;
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 110;
+      display: none;
+    }
+
+    .overlay.active {
+      display: block;
+    }
+
+    /* Add emoji picker styles */
+    .emoji-picker {
+      position: absolute;
+      bottom: 60px;
+      left: 0;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      padding: 15px;
+      width: 300px;
+      z-index: 120;
+      display: none;
+    }
+
+    .emoji-picker.active {
+      display: block;
+      animation: fadeIn 0.2s;
+    }
+
+    .emoji-grid {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 10px;
+    }
+
+    .emoji-item {
+      font-size: 1.5rem;
+      text-align: center;
+      cursor: pointer;
+      padding: 5px;
+      border-radius: 5px;
+      transition: background-color 0.2s;
+    }
+
+    .emoji-item:hover {
+      background-color: #f0f0f0;
+    }
+  </style>
+</head>
+<body>
+  <div class="toast-notification" id="toast">Message sent successfully!</div>
+  <div class="overlay" id="overlay"></div>
+
+  <button class="dark-mode-toggle" id="darkModeToggle">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>
+  </button>
+
+  <div class="compose-button" id="composeBtn">
+    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25z"></path>
+      <path d="M20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"></path>
+    </svg>
+  </div>
+
+  <div class="composer-container" id="composer">
+    <div class="composer-header">
+      <h2 class="composer-title">New Message</h2>
+      <button class="close-button" id="closeBtn">×</button>
+    </div>
+    
+    <div class="input-field">
+      <input type="text" id="recipientField" placeholder="">
+      <label for="recipientField">To</label>
+    </div>
+    
+    <div class="cc-bcc-buttons">
+      <button class="cc-bcc-button" id="ccButton">Cc</button>
+      <button class="cc-bcc-button" id="bccButton">Bcc</button>
+    </div>
+    
+    <div class="input-field" id="ccField" style="display: none;">
+      <input type="text" id="ccInput" placeholder="">
+      <label for="ccInput">Cc</label>
+    </div>
+    
+    <div class="input-field" id="bccField" style="display: none;">
+      <input type="text" id="bccInput" placeholder="">
+      <label for="bccInput">Bcc</label>
+    </div>
+    
+    <div class="input-field">
+      <input type="text" id="subjectField" placeholder="">
+      <label for="subjectField">Subject</label>
+    </div>
+    
+    <div class="formatting-toolbar">
+      <button class="format-button" title="Bold" id="boldBtn">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"></path>
+          <path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"></path>
+        </svg>
+      </button>
+      <button class="format-button" title="Italic" id="italicBtn">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="4" x2="10" y2="4"></line>
+          <line x1="14" y1="20" x2="5" y2="20"></line>
+          <line x1="15" y1="4" x2="9" y2="20"></line>
+        </svg>
+      </button>
+      <button class="format-button" title="Underline" id="underlineBtn">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 3v7a6 6 0 0 0 6 6 6 6 0 0 0 6-6V3"></path>
+          <line x1="4" y1="21" x2="20" y2="21"></line>
+        </svg>
+      </button>
+      <button class="format-button" title="Bullet List" id="bulletListBtn">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke=""currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="10" y1="6" x2="21" y2="6"></line>
+          <line x1="10" y1="12" x2="21" y2="12"></line>
+          <line x1="10" y1="18" x2="21" y2="18"></line>
+          <path d="M4 6h1v4"></path>
+          <path d="M4 10h2"></path>
+          <path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"></path>
+        </svg>
+      </button>
+      <button class="format-button" title="Quote" id="quoteBtn">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"></path>
+          <path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"></path>
+        </svg>
+      </button>
+      <button class="format-button" title="Link" id="linkBtn">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+        </svg>
+      </button>
+      <button class="format-button" title="Emoji" id="emojiBtn">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
+          <line x1="9" y1="9" x2="9.01" y2="9"></line>
+          <line x1="15" y1="9" x2="15.01" y2="9"></line>
+        </svg>
+      </button>
+    </div>
+    
+    <div class="attachment-area" id="attachmentArea">
+      <p class="attachment-text">Drag & drop files here or</p>
+      <button class="attachment-button">Choose files</button>
+    </div>
+    
+    <div class="email-content-container">
+      <textarea class="email-content" id="emailContent" placeholder="Compose your email here..."></textarea>
+      <div class="character-count" id="charCount">0 / 5000</div>
+      <div class="typing-indicator" id="typingIndicator">AI is writing...</div>
+    </div>
+    
+    <div class="emoji-picker" id="emojiPicker">
+      <div class="emoji-grid">
+        <div class="emoji-item">😀</div>
+        <div class="emoji-item">😊</div>
+        <div class="emoji-item">🙂</div>
+        <div class="emoji-item">😍</div>
+        <div class="emoji-item">😎</div>
+        <div class="emoji-item">🤩</div>
+        <div class="emoji-item">😇</div>
+        <div class="emoji-item">🥳</div>
+        <div class="emoji-item">👍</div>
+        <div class="emoji-item">👏</div>
+        <div class="emoji-item">🙏</div>
+        <div class="emoji-item">🎉</div>
+        <div class="emoji-item">❤️</div>
+        <div class="emoji-item">🔥</div>
+        <div class="emoji-item">💯</div>
+        <div class="emoji-item">✨</div>
+      </div>
+    </div>
+    
+    <div class="style-toolbar">
+      <button class="style-button" id="professionalBtn" disabled>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 7h-3a2 2 0 0 1-2-2V2"></path>
+          <path d="M9 18a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h7l4 4v10a2 2 0 0 1-2 2H9z"></path>
+          <path d="M3 7.6v12.8A1.6 1.6 0 0 0 4.6 22h14.8"></path>
+        </svg>
+        Professional
+      </button>
+      <button class="style-button" id="conciseBtn" disabled>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 10H3"></path>
+          <path d="M21 6H3"></path>
+          <path d="M21 14H3"></path>
+          <path d="M21 18H3"></path>
+        </svg>
+        Concise
+      </button>
+      <button class="style-button" id="friendlyBtn" disabled>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
+          <line x1="9" y1="9" x2="9.01" y2="9"></line>
+          <line x1="15" y1="9" x2="15.01" y2="9"></line>
+        </svg>
+        Friendly
+      </button>
+      <div class="tone-dropdown">
+        <button class="tone-button" id="moreTonesBtn" disabled>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="1"></circle>
+            <circle cx="19" cy="12" r="1"></circle>
+            <circle cx="5" cy="12" r="1"></circle>
+          </svg>
+          More Tones
+        </button>
+        <div class="tone-dropdown-content" id="toneDropdown">
+          <div class="tone-option" data-tone="persuasive">Persuasive</div>
+          <div class="tone-option" data-tone="enthusiastic">Enthusiastic</div>
+          <div class="tone-option" data-tone="formal">Formal</div>
+          <div class="tone-option" data-tone="empathetic">Empathetic</div>
+          <div class="tone-option" data-tone="authoritative">Authoritative</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="action-buttons">
+      <div class="action-left">
+        <button class="action-button" title="Attach Files" id="attachBtn">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
+          </svg>
+        </button>
+        <button class="action-button" title="Templates" id="templateBtn">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="3" y1="9" x2="21" y2="9"></line>
+            <line x1="9" y1="21" x2="9" y2="9"></line>
+          </svg>
+        </button>
+        <button class="action-button" title="Schedule" id="scheduleBtn">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+        </button>
+      </div>
+      
+      <button class="send-button" id="sendBtn">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13"></line>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+        </svg>
+        Send
+      </button>
+    </div>
+    
+    <div class="schedule-options" id="scheduleOptions">
+      <h3 class="schedule-title">Schedule Send</h3>
+      <input type="datetime-local" class="schedule-input" id="scheduleInput">
+      <div class="schedule-actions">
+        <button class="schedule-button cancel-schedule" id="cancelScheduleBtn">Cancel</button>
+        <button class="schedule-button confirm-schedule" id="confirmScheduleBtn">Schedule</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="template-area" id="templateArea">
+    <div class="template-header">
+      <h2>Choose a Template</h2>
+      <button class="close-button" id="closeTemplateBtn">×</button>
+    </div>
+    <div class="template-grid">
+      <div class="template-card" data-template="meeting">
+        <h3 class="template-title">Meeting Request</h3>
+        <p class="template-preview">Hi [Name], I'd like to schedule a meeting to discuss [Topic]. Are you available on [Date] at [Time]?</p>
+      </div>
+      <div class="template-card" data-template="follow-up">
+        <h3 class="template-title">Follow-up</h3>
+        <p class="template-preview">Hi [Name], I'm writing to follow up on our discussion about [Topic]. Have you had a chance to review the information I sent?</p>
+      </div>
+      <div class="template-card" data-template="introduction">
+        <h3 class="template-title">Introduction</h3>
+        <p class="template-preview">Hi [Name], I hope this email finds you well. My name is [Your Name] and I'm reaching out regarding [Reason].</p>
+      </div>
+      <div class="template-card" data-template="thank-you">
+        <h3 class="template-title">Thank You</h3>
+        <p class="template-preview">Hi [Name], Thank you for [Action/Event]. I really appreciate [Specific Detail].</p>
+      </div>
+      <div class="template-card" data-template="project-update">
+        <h3 class="template-title">Project Update</h3>
+        <p class="template-preview">Hi [Name], I wanted to provide an update on the [Project Name]. We've completed [Milestone] and are currently working on [Next Steps].</p>
+      </div>
+      <div class="template-card" data-template="feedback-request">
+        <h3 class="template-title">Feedback Request</h3>
+        <p class="template-preview">Hi [Name], I'd appreciate your feedback on [Project/Document]. Could you please review and share your thoughts by [Date]?</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // DOM Elements
+    const composeBtn = document.getElementById('composeBtn');
+    const composer = document.getElementById('composer');
+    const closeBtn = document.getElementById('closeBtn');
+    const emailContent = document.getElementById('emailContent');
+    const styleButtons = document.querySelectorAll('.style-button');
+    const attachBtn = document.getElementById('attachBtn');
+    const attachmentArea = document.getElementById('attachmentArea');
+    const ccButton = document.getElementById('ccButton');
+    const bccButton = document.getElementById('bccButton');
+    const ccField = document.getElementById('ccField');
+    const bccField = document.getElementById('bccField');
+    const charCount = document.getElementById('charCount');
+    const sendBtn = document.getElementById('sendBtn');
+    const toast = document.getElementById('toast');
+    const scheduleBtn = document.getElementById('scheduleBtn');
+    const scheduleOptions = document.getElementById('scheduleOptions');
+    const cancelScheduleBtn = document.getElementById('cancelScheduleBtn');
+    const confirmScheduleBtn = document.getElementById('confirmScheduleBtn');
+    const darkModeToggle = document.getElementById('darkModeToggle');
+    const templateBtn = document.getElementById('templateBtn');
+    const templateArea = document.getElementById('templateArea');
+    const closeTemplateBtn = document.getElementById('closeTemplateBtn');
+    const templateCards = document.querySelectorAll('.template-card');
+    const overlay = document.getElementById('overlay');
+    const moreTonesBtn = document.getElementById('moreTonesBtn');
+    const toneDropdown = document.getElementById('toneDropdown');
+    const toneOptions = document.querySelectorAll('.tone-option');
+    const emojiBtn = document.getElementById('emojiBtn');
+    const emojiPicker = document.getElementById('emojiPicker');
+    const emojiItems = document.querySelectorAll('.emoji-item');
+    const typingIndicator = document.getElementById('typingIndicator');
+    
+    // Sample text for each style
+    const sampleText = {
+      professional: "Dear Recipient,\n\nI hope this email finds you well. I am writing to discuss our upcoming project timeline and deliverables. Please review the attached documents and provide your feedback at your earliest convenience.\n\nBest regards,\nYour Name",
+      concise: "Hi,\n\nProject timeline attached. Need feedback by Friday.\n\nThanks,\nYour Name",
+      friendly: "Hey there!\n\nHow's everything going? Just checking in about our project - I've put together some ideas that I think you'll love! Let's catch up soon!\n\nCheers,\nYour Name",
+      persuasive: "Hello,\n\nI believe our solution perfectly addresses your needs. Here's why this is the ideal approach for your situation.\n\nLooking forward to your positive response,\nYour Name",
+      enthusiastic: "Hi there!\n\nI'm SUPER excited to share these amazing results with you! This is going to be a game-changer for our project!\n\nCan't wait to hear what you think!\nYour Name",
+      formal: "Dear Sir/Madam,\n\nWith reference to our previous correspondence, I hereby submit the requested documentation for your consideration.\n\nYours faithfully,\nYour Name",
+      empathetic: "Hi,\n\nI understand this has been a challenging time. I've thought about your situation and wanted to offer my support.\n\nWarmly,\nYour Name",
+      authoritative: "To whom it may concern,\n\nBased on our extensive analysis, the following approach is recommended. Please implement these changes by the specified deadline.\n\nRegards,\nYour Name"
+    };
+    
+    // Templates content
+    const templates = {
+      "meeting": "Hi [Name],\n\nI hope this email finds you well. I'd like to schedule a meeting to discuss [Topic]. Are you available on [Date] at [Time]?\n\nIf not, please suggest a time that works better for you.\n\nBest regards,\nYour Name",
+      "follow-up": "Hi [Name],\n\nI'm writing to follow up on our discussion about [Topic]. Have you had a chance to review the information I sent?\n\nI'm happy to provide any additional details that might be helpful.\n\nThank you,\nYour Name",
+      "introduction": "Hi [Name],\n\nI hope this email finds you well. My name is [Your Name] and I'm reaching out regarding [Reason].\n\n[Brief introduction about yourself or your company]\n\nI would love to connect and discuss potential opportunities for collaboration.\n\nBest regards,\nYour Name",
+      "thank-you": "Hi [Name],\n\nThank you for [Action/Event]. I really appreciate [Specific Detail].\n\n[Optional additional message]\n\nThanks again,\nYour Name",
+      "project-update": "Hi [Name],\n\nI wanted to provide an update on the [Project Name].\n\nWe've completed [Milestone] and are currently working on [Next Steps]. We're on track to meet our deadline of [Date].\n\nPlease let me know if you have any questions or concerns.\n\nBest regards,\nYour Name",
+      "feedback-request": "Hi [Name],\n\nI'd appreciate your feedback on [Project/Document]. Could you please review and share your thoughts by [Date]?\n\nSpecifically, I'm looking for input on [Specific Areas].\n\nThank you in advance,\nYour Name"
+    };
+
+    // Function to check if email content exists
+    function hasEmailContent() {
+      return emailContent.value.trim().length > 0;
+    }
+
+    // Function to update button states based on content
+    function updateButtonStates() {
+      const hasContent = hasEmailContent();
+      
+      // Enable or disable style buttons based on content
+      styleButtons.forEach(button => {
+        button.disabled = !hasContent;
+      });
+      
+      // Enable or disable "More Tones" button based on content
+      moreTonesBtn.disabled = !hasContent;
+    }
+
+    // Open composer when compose button is clicked
+    composeBtn.addEventListener('click', () => {
+      composer.classList.add('composer-show');
+    });
+
+    // Close composer when close button is clicked
+    closeBtn.addEventListener('click', () => {
+      composer.classList.remove('composer-show');
+    });
+
+    // Toggle CC field
+    ccButton.addEventListener('click', () => {
+      ccField.style.display = ccField.style.display === 'none' ? 'block' : 'none';
+    });
+
+    // Toggle BCC field
+    bccButton.addEventListener('click', () => {
+      bccField.style.display = bccField.style.display === 'none' ? 'block' : 'none';
+    });
+
+    // Toggle attachment area
+    attachBtn.addEventListener('click', () => {
+      attachmentArea.classList.toggle('active');
+    });
+
+    // Toggle schedule options
+    scheduleBtn.addEventListener('click', () => {
+      scheduleOptions.classList.toggle('active');
+    });
+
+    // Cancel scheduling
+    cancelScheduleBtn.addEventListener('click', () => {
+      scheduleOptions.classList.remove('active');
+    });
+
+    // Confirm scheduling
+    confirmScheduleBtn.addEventListener('click', () => {
+      const scheduleDate = document.getElementById('scheduleInput').value;
+      if (scheduleDate) {
+        scheduleOptions.classList.remove('active');
+        showToast(`Email scheduled for ${new Date(scheduleDate).toLocaleString()}`, 'success');
+      } else {
+        showToast('Please select a date and time', 'warning');
+      }
+    });
+
+    // Toggle dark mode
+    darkModeToggle.addEventListener('click', () => {
+      document.body.classList.toggle('dark-mode');
+      
+      // Update dark mode icon
+      if (document.body.classList.contains('dark-mode')) {
+        darkModeToggle.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>';
+      } else {
+        darkModeToggle.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>';
+      }
+    });
+
+    // Open templates
+    templateBtn.addEventListener('click', () => {
+      templateArea.classList.add('active');
+      overlay.classList.add('active');
+    });
+
+    // Close templates
+    closeTemplateBtn.addEventListener('click', () => {
+      templateArea.classList.remove('active');
+      overlay.classList.remove('active');
+    });
+
+    // Select template
+    templateCards.forEach(card => {
+      card.addEventListener('click', () => {
+        const templateType = card.getAttribute('data-template');
+        emailContent.value = templates[templateType];
+        templateArea.classList.remove('active');
+        overlay.classList.remove('active');
+        updateCharCount();
+        updateButtonStates();
+      });
+    });
+
+    // Toggle more tones dropdown
+    moreTonesBtn.addEventListener('click', () => {
+      toneDropdown.classList.toggle('show');
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (event) => {
+      if (!moreTonesBtn.contains(event.target) && !toneDropdown.contains(event.target)) {
+        toneDropdown.classList.remove('show');
+      }
+      
+      // Close emoji picker when clicking outside
+      if (!emojiBtn.contains(event.target) && !emojiPicker.contains(event.target)) {
+        emojiPicker.classList.remove('active');
+      }
+    });
+
+    // Toggle emoji picker
+    emojiBtn.addEventListener('click', () => {
+      emojiPicker.classList.toggle('active');
+    });
+
+    // Insert emoji
+    emojiItems.forEach(emoji => {
+      emoji.addEventListener('click', () => {
+        const cursorPos = emailContent.selectionStart;
+        const textBefore = emailContent.value.substring(0, cursorPos);
+        const textAfter = emailContent.value.substring(cursorPos);
+        emailContent.value = textBefore + emoji.innerText + textAfter;
+        emailContent.focus();
+        emailContent.selectionStart = cursorPos + emoji.innerText.length;
+        emailContent.selectionEnd = cursorPos + emoji.innerText.length;
+        emojiPicker.classList.remove('active');
+        updateCharCount();
+        updateButtonStates();
+      });
+    });
+
+    // Apply formatting functions
+    document.getElementById('boldBtn').addEventListener('click', () => insertFormatting('**', '**'));
+    document.getElementById('italicBtn').addEventListener('click', () => insertFormatting('_', '_'));
+    document.getElementById('underlineBtn').addEventListener('click', () => insertFormatting('<u>', '</u>'));
+    document.getElementById('bulletListBtn').addEventListener('click', () => insertList('• '));
+    document.getElementById('numberedListBtn').addEventListener('click', () => insertList('1. ', true));
+    document.getElementById('quoteBtn').addEventListener('click', () => insertFormatting('> ', '\n'));
+    document.getElementById('linkBtn').addEventListener('click', insertLink);
+
+    // Insert formatting helper function
+    function insertFormatting(startTag, endTag) {
+      const start = emailContent.selectionStart;
+      const end = emailContent.selectionEnd;
+      const selectedText = emailContent.value.substring(start, end);
+      const beforeText = emailContent.value.substring(0, start);
+      const afterText = emailContent.value.substring(end);
+      
+      emailContent.value = beforeText + startTag + selectedText + endTag + afterText;
+      emailContent.focus();
+      emailContent.selectionStart = start + startTag.length;
+      emailContent.selectionEnd = start + startTag.length + selectedText.length;
+      updateCharCount();
+    }
+
+    // Insert list helper function
+    function insertList(prefix, numbered = false) {
+      const start = emailContent.selectionStart;
+      const end = emailContent.selectionEnd;
+      const selectedText = emailContent.value.substring(start, end);
+      const beforeText = emailContent.value.substring(0, start);
+      const afterText = emailContent.value.substring(end);
+      
+      let formattedText;
+      if (selectedText.trim() === '') {
+        formattedText = prefix;
+      } else {
+        const lines = selectedText.split('\n');
+        if (numbered) {
+          formattedText = lines.map((line, i) => `${i + 1}. ${line}`).join('\n');
+        } else {
+          formattedText = lines.map(line => `${prefix}${line}`).join('\n');
+        }
+      }
+      
+      emailContent.value = beforeText + formattedText + afterText;
+      emailContent.focus();
+      updateCharCount();
+    }
+
+    // Insert link function
+    function insertLink() {
+      const start = emailContent.selectionStart;
+      const end = emailContent.selectionEnd;
+      const selectedText = emailContent.value.substring(start, end);
+      const beforeText = emailContent.value.substring(0, start);
+      const afterText = emailContent.value.substring(end);
+      
+      let linkText = selectedText || 'link text';
+      let linkUrl = 'https://';
+      
+      if (selectedText.startsWith('http')) {
+        linkUrl = selectedText;
+        linkText = 'link text';
+      }
+      
+      emailContent.value = beforeText + `[${linkText}](${linkUrl})` + afterText;
+      emailContent.focus();
+      updateCharCount();
+    }
+
+    // Update character count
+    function updateCharCount() {
+      const count = emailContent.value.length;
+      const maxCount = 5000;
+      charCount.textContent = `${count} / ${maxCount}`;
+      
+      if (count > maxCount) {
+        charCount.classList.add('red-count');
+      } else {
+        charCount.classList.remove('red-count');
+      }
+    }
+
+    // Show toast notification
+    function showToast(message, type = '') {
+      toast.textContent = message;
+      toast.className = 'toast-notification';
+      
+      if (type) {
+        toast.classList.add(type);
+      }
+      
+      toast.classList.add('show');
+      
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+
+    // Apply style when a style button is clicked
+    styleButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        if (hasEmailContent()) {
+          // Remove active class from all buttons
+          styleButtons.forEach(btn => btn.classList.remove('active'));
+          
+          // Add active class to clicked button
+          this.classList.add('active');
+          
+          // Get style type from button ID
+          const styleType = this.id.replace('Btn', '').toLowerCase();
+          
+          // Apply rainbow animation to text
+          applyRainbowAnimation(styleType);
+        }
+      });
+    });
+
+    // Apply style from tone options
+    toneOptions.forEach(option => {
+      option.addEventListener('click', function() {
+        if (hasEmailContent()) {
+          // Remove active class from all style buttons and tone options
+          styleButtons.forEach(btn => btn.classList.remove('active'));
+          toneOptions.forEach(opt => opt.classList.remove('active'));
+          
+          // Add active class to clicked option
+          this.classList.add('active');
+          
+          // Get tone type
+          const toneType = this.getAttribute('data-tone');
+          
+          // Apply rainbow animation to text
+          applyRainbowAnimation(toneType);
+          
+          // Hide dropdown
+          toneDropdown.classList.remove('show');
+        }
+      });
+    });
+
+    // Function to apply rainbow animation
+    function applyRainbowAnimation(styleType) {
+      // Show typing indicator
+      typingIndicator.classList.add('active');
+      
+      // Get the content
+      const content = emailContent.value || sampleText[styleType];
+      
+      // Save current selection
+      const start = emailContent.selectionStart;
+      const end = emailContent.selectionEnd;
+      
+      // Create temporary elements for animation
+      const tempContainer = document.createElement('div');
+      tempContainer.style.position = 'absolute';
+      tempContainer.style.top = emailContent.offsetTop + 'px';
+      tempContainer.style.left = emailContent.offsetLeft + 'px';
+tempContainer.style.width = emailContent.offsetWidth + 'px';
+tempContainer.style.height = emailContent.offsetHeight + 'px';
+tempContainer.style.backgroundColor = document.body.classList.contains('dark-mode') ? '#2d2d2d' : 'white';
+tempContainer.style.padding = '15px';
+tempContainer.style.overflow = 'auto';
+tempContainer.style.boxSizing = 'border-box';
+tempContainer.style.border = document.body.classList.contains('dark-mode') ? '1px solid #444' : '1px solid #ddd';
+tempContainer.style.borderRadius = '8px';
+tempContainer.style.zIndex = '100';
+tempContainer.style.fontFamily = getComputedStyle(emailContent).fontFamily;
+tempContainer.style.fontSize = getComputedStyle(emailContent).fontSize;
+tempContainer.style.color = document.body.classList.contains('dark-mode') ? '#e0e0e0' : '#333';
+
+// Split content by words to animate each
+const words = content.split(/\b/);
+words.forEach((word, index) => {
+  const span = document.createElement('span');
+  span.textContent = word;
+  span.style.display = 'inline-block';
+  
+  // Add animation with delay based on word index
+  if (word.trim().length > 0) {
+    span.classList.add('rainbow-text');
+    span.style.animationDelay = (index * 0.05) + 's';
+  }
+  
+  tempContainer.appendChild(span);
+});
+
+document.body.appendChild(tempContainer);
+
+// Hide the original textarea temporarily
+emailContent.style.opacity = '0';
+
+// Apply text based on style after animation completes
+setTimeout(() => {
+  tempContainer.remove();
+  emailContent.value = sampleText[styleType] || content;
+  emailContent.style.opacity = '1';
+  typingIndicator.classList.remove('active');
+  
+  // Restore selection
+  emailContent.setSelectionRange(start, end);
+  emailContent.focus();
+  
+  // Update character count
+  updateCharCount();
+}, 3000);
+}
+
+// Listen for changes to email content for updating button states
+emailContent.addEventListener('input', () => {
+  updateButtonStates();
+  updateCharCount();
+});
+
+// Send email action
+sendBtn.addEventListener('click', () => {
+  if (hasEmailContent()) {
+    const recipient = document.getElementById('recipientField').value;
+    if (recipient.trim() === '') {
+      showToast('Please specify a recipient', 'warning');
+    } else {
+      showToast('Email sent successfully!', 'success');
+      
+      // Reset form
+      setTimeout(() => {
+        emailContent.value = '';
+        document.getElementById('recipientField').value = '';
+        document.getElementById('subjectField').value = '';
+        if (ccField.style.display !== 'none') {
+          document.getElementById('ccInput').value = '';
+          ccField.style.display = 'none';
+        }
+        if (bccField.style.display !== 'none') {
+          document.getElementById('bccInput').value = '';
+          bccField.style.display = 'none';
+        }
+        composer.classList.remove('composer-show');
+        styleButtons.forEach(btn => btn.classList.remove('active'));
+        updateButtonStates();
+        updateCharCount();
+      }, 1000);
+    }
+  } else {
+    showToast('Please write a message before sending', 'warning');
+  }
+});
+
+// Close overlay on click
+overlay.addEventListener('click', () => {
+  templateArea.classList.remove('active');
+  overlay.classList.remove('active');
+});
+
+// Initialize character count and button states
+updateCharCount();
+updateButtonStates();
+
+// Set default date for schedule input (tomorrow, same time)
+const tomorrow = new Date();
+tomorrow.setDate(tomorrow.getDate() + 1);
+tomorrow.setMinutes(tomorrow.getMinutes() - tomorrow.getMinutes() % 15); // Round to nearest 15 minutes
+const scheduleInput = document.getElementById('scheduleInput');
+const tomorrowFormatted = tomorrow.toISOString().slice(0, 16); // Format as YYYY-MM-DDThh:mm
+scheduleInput.value = tomorrowFormatted;
+
+// Enable drag and drop for attachment area
+const dragArea = document.getElementById('attachmentArea');
+
+dragArea.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  dragArea.style.borderColor = '#1a73e8';
+  dragArea.style.backgroundColor = document.body.classList.contains('dark-mode') ? '#333' : '#f0f7ff';
+});
+
+dragArea.addEventListener('dragleave', () => {
+  dragArea.style.borderColor = document.body.classList.contains('dark-mode') ? '#444' : '#ddd';
+  dragArea.style.backgroundColor = document.body.classList.contains('dark-mode') ? '#2a2a2a' : '#fafafa';
+});
+
+dragArea.addEventListener('drop', (e) => {
+  e.preventDefault();
+  dragArea.style.borderColor = document.body.classList.contains('dark-mode') ? '#444' : '#ddd';
+  dragArea.style.backgroundColor = document.body.classList.contains('dark-mode') ? '#2a2a2a' : '#fafafa';
+  
+  if (e.dataTransfer.files.length > 0) {
+    const fileNames = Array.from(e.dataTransfer.files).map(file => file.name).join(', ');
+    showToast(`Files attached: ${fileNames}`, 'success');
+  }
+});
+
+// Handle attachment button click
+const attachmentButton = document.querySelector('.attachment-button');
+attachmentButton.addEventListener('click', () => {
+  // In a real application, this would trigger a file selection dialog
+  showToast('File selection dialog would open here', 'info');
+});
+
+// Add keyboard shortcuts
+document.addEventListener('keydown', (e) => {
+  // Ctrl/Cmd + Enter to send email
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+    if (composer.classList.contains('composer-show')) {
+      sendBtn.click();
+      e.preventDefault();
+    }
+  }
+  
+  // Escape to close composer
+  if (e.key === 'Escape') {
+    if (composer.classList.contains('composer-show')) {
+      composer.classList.remove('composer-show');
+      e.preventDefault();
+    }
+  }
+});
+
+// Initialize tooltips for emoji picker
+const emojiItemsWithTooltips = document.querySelectorAll('.emoji-item');
+emojiItemsWithTooltips.forEach(item => {
+  item.title = item.textContent;
+});
+</script>
+</body>
+</html>

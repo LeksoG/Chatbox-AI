@@ -1,0 +1,2138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Advanced AI Assistant</title>
+  <style>
+    :root {
+      --primary: #7b68ee;
+      --primary-gradient: linear-gradient(135deg, #7b68ee 0%, #a891ff 100%);
+      --secondary: #a891ff;
+      --accent: #00d2ff;
+      --accent-gradient: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);
+      --dark: #1e1e2f;
+      --light: #f8faff;
+      --bg: #f2f5ff;
+      --gray: #e4e8f7;
+      --text: #2c2c3d;
+      --text-light: #6c7293;
+      --shadow: 0 15px 35px rgba(123, 104, 238, 0.15);
+      --card-shadow: 0 8px 24px rgba(0, 0, 0, 0.07);
+      --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      --fast-transition: all 0.2s ease-out;
+      --border-radius: 24px;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', sans-serif;
+    }
+    
+    body {
+      background-color: var(--bg);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(123, 104, 238, 0.05) 0%, rgba(254, 254, 254, 0.05) 90%),
+        linear-gradient(135deg, rgba(123, 104, 238, 0.03) 0%, rgba(0, 210, 255, 0.03) 100%);
+    }
+    
+    .chat-container {
+      width: 100%;
+      max-width: 440px;
+      height: 700px;
+      background: white;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+      isolation: isolate;
+    }
+    
+    .chat-header {
+      padding: 16px 24px; /* Reduced padding for more compact header */
+      background: var(--primary-gradient);
+      color: white;
+      display: flex;
+      align-items: center;
+      position: relative;
+      z-index: 10;
+    }
+    
+    .header-avatar {
+      width: 42px; /* Smaller avatar */
+      height: 42px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.15);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-right: 14px;
+      overflow: hidden;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+      position: relative;
+    }
+    
+    .header-avatar::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 100%);
+      border-radius: 14px;
+    }
+    
+    .avatar-icon {
+      font-size: 22px; /* Smaller font size */
+      font-weight: bold;
+      background: linear-gradient(to right, #fff, #e0e0ff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .user-info {
+      flex: 1;
+    }
+    
+    .user-name {
+      font-weight: 700;
+      font-size: 18px; /* Smaller font size */
+      margin-bottom: 2px; /* Reduced margin */
+      letter-spacing: -0.3px;
+    }
+    
+    .user-status {
+      font-size: 12px; /* Smaller font size */
+      display: flex;
+      align-items: center;
+      opacity: 0.9;
+    }
+    
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      background: #4ded6e;
+      border-radius: 50%;
+      margin-right: 6px;
+      position: relative;
+    }
+    
+    .status-dot::after {
+      content: '';
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      background: rgba(77, 237, 110, 0.4);
+      border-radius: 50%;
+      top: -3px;
+      left: -3px;
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 0.7; }
+      50% { transform: scale(1.5); opacity: 0; }
+      100% { transform: scale(1); opacity: 0; }
+    }
+    
+    .header-actions {
+      display: flex;
+    }
+    
+    .header-icon {
+      width: 36px; /* Smaller icon */
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.15);
+      cursor: pointer;
+      margin-left: 10px;
+      transition: var(--transition);
+    }
+    
+    .header-icon:hover {
+      background: rgba(255, 255, 255, 0.25);
+      transform: translateY(-2px);
+    }
+    
+    .chat-messages {
+      flex: 1;
+      padding: 30px;
+      overflow-y: auto;
+      background: white;
+      position: relative;
+      scrollbar-width: thin;
+      scrollbar-color: var(--gray) transparent;
+      scroll-behavior: smooth;
+    }
+    
+    .chat-messages::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    .chat-messages::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    
+    .chat-messages::-webkit-scrollbar-thumb {
+      background-color: var(--gray);
+      border-radius: 20px;
+    }
+    
+    .date-divider {
+      text-align: center;
+      margin: 20px 0;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .date-divider span {
+      background: white;
+      padding: 0 15px;
+      font-size: 12px;
+      color: var(--text-light);
+      position: relative;
+      z-index: 2;
+    }
+    
+    .date-divider::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 50%;
+      height: 1px;
+      background: var(--gray);
+      z-index: 1;
+    }
+    
+    .message {
+      margin-bottom: 22px;
+      max-width: 85%;
+      animation: messageAnim 0.4s cubic-bezier(0.215, 0.61, 0.355, 1);
+      position: relative;
+      clear: both;
+    }
+    
+    @keyframes messageAnim {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .message-incoming {
+      float: left;
+    }
+    
+    .message-outgoing {
+      float: right;
+    }
+    
+    .message-content {
+      padding: 16px 20px;
+      border-radius: 22px;
+      position: relative;
+      line-height: 1.6;
+      font-size: 15px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s ease;
+    }
+    
+    .message-incoming .message-content {
+      background: var(--light);
+      color: var(--text);
+      border-bottom-left-radius: 6px;
+      border-left: 3px solid rgba(0, 210, 255, 0.4);
+    }
+    
+    .message-outgoing .message-content {
+      background: var(--primary-gradient);
+      color: white;
+      border-bottom-right-radius: 6px;
+    }
+    
+    .message-time {
+      font-size: 11px;
+      margin-top: 6px;
+      opacity: 0.75;
+    }
+    
+    .message-incoming .message-time {
+      color: var(--text-light);
+      margin-left: 5px;
+      float: left;
+      clear: both;
+    }
+    
+    .message-outgoing .message-time {
+      color: var(--text-light);
+      margin-right: 5px;
+      float: right;
+      clear: both;
+    }
+    
+    .ai-indicator {
+      background: var(--accent-gradient);
+      color: white;
+      font-size: 10px;
+      font-weight: bold;
+      padding: 3px 10px;
+      border-radius: 10px;
+      position: absolute;
+      top: -12px;
+      left: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      box-shadow: 0 4px 10px rgba(0, 210, 255, 0.3);
+      backdrop-filter: blur(4px);
+    }
+    
+    .list-card {
+      background: white;
+      border-radius: 16px;
+      margin: 10px 0;
+      overflow: hidden;
+      box-shadow: var(--card-shadow);
+      border: 1px solid var(--gray);
+    }
+    
+    .list-title {
+      padding: 12px 16px;
+      background: var(--accent-gradient);
+      color: white;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    
+    .list-item {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--gray);
+      font-size: 14px;
+    }
+    
+    .list-item:last-child {
+      border-bottom: none;
+    }
+    
+    .typing-indicator {
+      display: flex;
+      padding: 12px 20px;
+      background: var(--light);
+      border-radius: 22px;
+      width: fit-content;
+      margin-bottom: 20px;
+      position: relative;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+      animation: slideInFromBottom 0.4s ease-out;
+      clear: both;
+      float: left;
+      border-bottom-left-radius: 6px;
+      border-left: 3px solid rgba(0, 210, 255, 0.4);
+    }
+    
+    @keyframes slideInFromBottom {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .typing-indicator::before {
+      content: 'AI thinking';
+      position: absolute;
+      top: -20px;
+      left: 12px;
+      font-size: 11px;
+      color: var(--text-light);
+      background: var(--accent-gradient);
+      color: white;
+      padding: 3px 8px;
+      border-radius: 10px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      box-shadow: 0 4px 10px rgba(0, 210, 255, 0.3);
+      backdrop-filter: blur(4px);
+    }
+    
+    .typing-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--primary);
+      border-radius: 50%;
+      margin: 0 3px;
+      display: inline-block;
+      animation: typingDot 1.4s infinite ease-in-out both;
+    }
+    
+    .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+    .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+    
+    @keyframes typingDot {
+      0%, 80%, 100% { transform: scale(0.7); opacity: 0.6; }
+      40% { transform: scale(1); opacity: 1; }
+    }
+    
+    .chat-input-container {
+      padding: 12px 20px 20px 20px;
+      background: white;
+      border-top: 1px solid var(--gray);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      z-index: 5;
+    }
+    
+    .input-suggestions-container {
+      padding: 8px 0;
+      display: flex;
+      overflow-x: auto;
+      overflow-y: hidden;
+      gap: 8px;
+      transition: opacity 0.25s ease-out, max-height 0.3s ease-out;
+      max-height: 45px;
+      opacity: 1;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      scroll-behavior: smooth;
+    }
+    
+    .input-suggestions-container::-webkit-scrollbar {
+      display: none;
+    }
+    
+    .input-suggestions-container.hidden {
+      opacity: 0;
+      max-height: 0;
+      padding: 0;
+    }
+    
+    .suggestion-chip {
+      background: rgba(123, 104, 238, 0.06);
+      border: 1px solid rgba(123, 104, 238, 0.2);
+      color: var(--primary);
+      font-size: 13px;
+      padding: 5px 12px;
+      border-radius: 100px;
+      white-space: nowrap;
+      cursor: pointer;
+      pointer-events: auto;
+      transition: var(--fast-transition);
+      animation: fadeIn 0.4s ease-out forwards;
+      flex-shrink: 0;
+    }
+    
+    .suggestion-chip.active {
+      background: rgba(123, 104, 238, 0.15);
+      border-color: rgba(123, 104, 238, 0.4);
+      transform: translateY(-2px);
+      box-shadow: 0 2px 5px rgba(123, 104, 238, 0.2);
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .suggestion-chip:nth-child(2) { animation-delay: 0.05s; }
+    .suggestion-chip:nth-child(3) { animation-delay: 0.1s; }
+    .suggestion-chip:nth-child(4) { animation-delay: 0.15s; }
+    .suggestion-chip:nth-child(5) { animation-delay: 0.2s; }
+    
+    .suggestion-chip:hover {
+      background: rgba(123, 104, 238, 0.1);
+      border-color: rgba(123, 104, 238, 0.4);
+      transform: translateY(-2px);
+    }
+    
+    .input-row {
+      display: flex;
+      align-items: center;
+      position: relative;
+    }
+    
+    .chat-tools {
+      display: flex;
+      margin-right: 12px;
+    }
+    
+    .tool-button {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: var(--text-light);
+      cursor: pointer;
+      transition: var(--transition);
+      background: var(--light);
+      margin-right: 10px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+    }
+    
+    .tool-button:hover {
+      background: var(--gray);
+      color: var(--primary);
+      transform: translateY(-2px);
+    }
+    
+    .chat-input-wrapper {
+      flex: 1;
+      background: var(--light);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      padding: 0 6px 0 20px;
+      transition: var(--transition);
+      border: 2px solid transparent;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+      position: relative;
+    }
+    
+    .chat-input-wrapper:focus-within {
+      box-shadow: 0 0 0 3px rgba(123, 104, 238, 0.2);
+      background: white;
+      border-color: var(--primary);
+    }
+    
+    .chat-input {
+      flex: 1;
+      border: none;
+      outline: none;
+      background: transparent;
+      padding: 14px 0;
+      font-size: 15px;
+      color: var(--text);
+    }
+    
+    .chat-input::placeholder {
+      color: var(--text-light);
+    }
+    
+    .send-button {
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
+      background: var(--primary-gradient);
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      transition: var(--transition);
+      border: none;
+      outline: none;
+      box-shadow: 0 6px 16px rgba(123, 104, 238, 0.3);
+      margin-left: 10px;
+    }
+    
+    .send-button:hover {
+      transform: scale(1.05) translateY(-2px);
+      box-shadow: 0 8px 20px rgba(123, 104, 238, 0.4);
+    }
+    
+    .send-button:active {
+      transform: scale(0.95);
+    }
+    
+    /* Emoji suggestion styles */
+    .emoji-suggestions {
+      position: absolute;
+      top: -50px;
+      left: 20px;
+      background: white;
+      border-radius: 14px;
+      padding: 5px;
+      display: flex;
+      gap: 8px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      border: 1px solid var(--gray);
+      animation: popIn 0.3s cubic-bezier(0.215, 0.61, 0.355, 1);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+      z-index: 100;
+    }
+    
+    .emoji-suggestions.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    
+    @keyframes popIn {
+      from { transform: translateY(5px) scale(0.95); opacity: 0; }
+      to { transform: translateY(0) scale(1); opacity: 1; }
+    }
+    
+    .emoji-option {
+      font-size: 22px;
+      width: 38px;
+      height: 38px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      border-radius: 10px;
+      transition: all 0.2s ease;
+      background: var(--light);
+    }
+    
+    .emoji-option:hover {
+      background: var(--gray);
+      transform: scale(1.1);
+    }
+    
+    .emoji-option.active {
+      background: var(--primary);
+      color: white;
+    }
+    
+    /* Moving emoji animation */
+    .moving-emoji {
+      position: absolute;
+      z-index: 1000;
+      font-size: 22px;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s cubic-bezier(0.22, 0.61, 0.36, 1);
+    }
+    
+    /* Emoji panel styles */
+    .emoji-panel {
+      position: absolute;
+      bottom: 90px;
+      left: 20px;
+      right: 20px;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      max-height: 0;
+      overflow: hidden;
+      opacity: 0;
+      transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+    }
+    
+    .emoji-panel.active {
+      max-height: 320px;
+      opacity: 1;
+    }
+    
+    .emoji-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--gray);
+      padding: 10px 15px;
+    }
+    
+    .emoji-tab {
+      padding: 8px 12px;
+      border-radius: 100px;
+      cursor: pointer;
+      margin-right: 8px;
+      font-size: 14px;
+      transition: all 0.2s ease;
+      background: transparent;
+    }
+    
+    .emoji-tab:hover {
+      background: var(--light);
+    }
+    
+    .emoji-tab.active {
+      background: var(--primary);
+      color: white;
+    }
+    
+    .emoji-content {
+      padding: 15px;
+      overflow-y: auto;
+      max-height: 260px;
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+    }
+    
+    .emoji-item {
+      font-size: 24px;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+    }
+    
+    .emoji-item:hover {
+      background: var(--light);
+      transform: scale(1.1);
+    }
+    
+    .chat-decoration {
+      position: absolute;
+      background: linear-gradient(135deg, var(--primary) 0%, transparent 60%);
+      opacity: 0.03;
+      border-radius: 50%;
+      z-index: 0;
+    }
+    
+    .decoration-1 {
+      width: 400px;
+      height: 400px;
+      top: -200px;
+      right: -200px;
+    }
+    
+    .decoration-2 {
+      width: 300px;
+      height: 300px;
+      bottom: -100px;
+      left: -100px;
+      background: linear-gradient(135deg, var(--accent) 0%, transparent 60%);
+    }
+    
+    .decoration-3 {
+      width: 200px;
+      height: 200px;
+      top: 40%;
+      left: -100px;
+      background: radial-gradient(circle, var(--primary) 0%, transparent 70%);
+    }
+    
+    /* Moving suggestion animation */
+    .moving-suggestion {
+      position: absolute;
+      z-index: 1000;
+      background: rgba(123, 104, 238, 0.06);
+      border: 1px solid rgba(123, 104, 238, 0.2);
+      color: var(--primary);
+      font-size: 15px; /* Match input text size */
+      padding: 5px 12px;
+      border-radius: 100px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s cubic-bezier(0.22, 0.61, 0.36, 1);
+      text-align: left;
+    }
+    
+    /* Card styling for routine plans */
+    .routine-card {
+      background: white;
+      border-radius: 16px;
+      padding: 0;
+      margin: 10px 0;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      border: 1px solid var(--gray);
+    }
+    
+    .routine-header {
+      background: var(--accent-gradient);
+      color: white;
+      padding: 12px 15px;
+      font-weight: 600;
+      font-size: 15px;
+    }
+    
+    .routine-item {
+      padding: 12px 15px;
+      border-bottom: 1px solid var(--gray);
+      display: flex;
+    }
+    
+    .routine-time {
+      font-weight: 600;
+      color: var(--primary);
+      margin-right: 12px;
+      min-width: 60px;
+    }
+    
+    .routine-description {
+      flex: 1;
+      font-size: 14px;
+    }
+    
+    .routine-item:last-child {
+      border-bottom: none;
+    }
+    
+    /* Styles for food and activity suggestions */
+    .suggestion-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin: 10px 0;
+    }
+    
+    .suggestion-item {
+      background: var(--light);
+      border-radius: 12px;
+      padding: 12px;
+      font-size: 14px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+      transition: var(--transition);
+    }
+    
+    .suggestion-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+    
+    .suggestion-emoji {
+      font-size: 20px;
+      margin-bottom: 6px;
+    }
+    
+    .suggestion-title {
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: var(--text);
+    }
+    
+    .suggestion-desc {
+      color: var(--text-light);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-container">
+    <div class="chat-decoration decoration-1"></div>
+    <div class="chat-decoration decoration-2"></div>
+    <div class="chat-decoration decoration-3"></div>
+    
+    <div class="chat-header">
+      <div class="header-avatar">
+        <div class="avatar-icon">AI</div>
+      </div>
+      <div class="user-info">
+        <div class="user-name">Nexus Assistant</div>
+        <div class="user-status"><span class="status-dot"></span>Ready to assist</div>
+      </div>
+      <div class="header-actions">
+        <div class="header-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="1"></circle>
+            <circle cx="12" cy="5" r="1"></circle>
+            <circle cx="12" cy="19" r="1"></circle>
+          </svg>
+        </div>
+      </div>
+    </div>
+    
+    <div class="chat-messages" id="chat-messages">
+      <!-- Messages will be added here -->
+    </div>
+    
+    <!-- Emoji panel with categories -->
+    <div class="emoji-panel" id="emoji-panel">
+      <div class="emoji-tabs" id="emoji-tabs">
+        <div class="emoji-tab active" data-category="happy">Happy</div>
+        <div class="emoji-tab" data-category="sad">Sad</div>
+        <div class="emoji-tab" data-category="love">Love</div>
+        <div class="emoji-tab" data-category="angry">Angry</div>
+        <div class="emoji-tab" data-category="objects">Objects</div>
+        <div class="emoji-tab" data-category="all">All</div>
+      </div>
+      <div class="emoji-content" id="emoji-content">
+        <!-- Emojis will be added here dynamically -->
+      </div>
+    </div>
+    
+    <div class="chat-input-container">
+      <!-- Suggestions row above the input field -->
+      <div class="input-suggestions-container" id="input-suggestions-container">
+        <div class="suggestion-chip">How do I create a meal plan?</div>
+        <div class="suggestion-chip">Morning routine ideas</div>
+        <div class="suggestion-chip">Productivity tips</div>
+        <div class="suggestion-chip">Best exercises for beginners</div>
+        <div class="suggestion-chip">Recommend healthy snacks</div>
+      </div>
+      
+      <!-- Input row with tools and send button -->
+      <div class="input-row">
+        <div class="chat-tools">
+          <div class="tool-button" id="emoji-button">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
+              <line x1="9" y1="9" x2="9.01" y2="9"></line>
+              <line x1="15" y1="9" x2="15.01" y2="9"></line>
+            </svg>
+          </div>
+        </div>
+        <div class="chat-input-wrapper">
+          <!-- Emoji suggestions popup -->
+          <div class="emoji-suggestions" id="emoji-suggestions"></div>
+          <input type="text" class="chat-input" id="message-input" placeholder="Type your message..." />
+          <button class="send-button" id="send-button">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13"></line>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Element for animated suggestion -->
+    <div class="moving-suggestion" id="moving-suggestion"></div>
+    <!-- Element for animated emoji -->
+    <div class="moving-emoji" id="moving-emoji"></div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const chatMessages = document.getElementById('chat-messages');
+      const messageInput = document.getElementById('message-input');
+      const sendButton = document.getElementById('send-button');
+      const emojiButton = document.getElementById('emoji-button');
+      const emojiPanel = document.getElementById('emoji-panel');
+      const emojiTabs = document.getElementById('emoji-tabs');
+      const emojiContent = document.getElementById('emoji-content');
+      const inputSuggestionsContainer = document.getElementById('input-suggestions-container');
+      const movingSuggestion = document.getElementById('moving-suggestion');
+      const movingEmoji = document.getElementById('moving-emoji');
+      const emojiSuggestions = document.getElementById('emoji-suggestions');
+      const suggestionChips = document.querySelectorAll('.suggestion-chip');
+      
+      const emojiCategories = {
+    "frequently-used": ["😊", "👍", "🙌", "🎉", "🔥", "❤️", "😂", "🤔", "👏", "✨", "😍", "🙏", "👀", "💯", "⭐", "🤩", "🙄", "😎", "🤗", "😁", "😉", "🚀", "💪", "🌈", "🎊", "🌟", "💖", "👋", "🌞", "🤖"],
+    "smileys": ["😀", "😃", "😄", "😁", "😆", "😅", "😂", "🤣", "😊", "😇", "🙂", "🙃", "😉", "😌", "😍", "🥰", "😘", "😗", "😙", "😚", "😋", "😛", "😝", "😜", "🤪", "🤨", "🧐", "🤓", "😎", "🤩"],
+    "people": ["👶", "👦", "👧", "👨", "👩", "👴", "👵", "👨‍⚕️", "👩‍⚕️", "👨‍🎓", "👩‍🎓", "👨‍🏫", "👩‍🏫", "👨‍⚖️", "👩‍⚖️", "👨‍🌾", "👩‍🌾", "👨‍🍳", "👩‍🍳", "👨‍🔧", "👩‍🔧", "👮‍♂️", "👮‍♀️", "🕵️‍♂️", "🕵️‍♀️", "💂‍♂️", "💂‍♀️", "👷‍♂️", "👷‍♀️", "👑"],
+    "animals": ["🐶", "🐱", "🐭", "🐹", "🐰", "🦊", "🐻", "🐼", "🐨", "🐯", "🦁", "🐮", "🐷", "🐸", "🐵", "🐔", "🐧", "🐦", "🐤", "🐣", "🦆", "🦅", "🦉", "🦇", "🐺", "🐗", "🐴", "🦄", "🐝", "🐛"],
+    "food": ["🍎", "🍐", "🍊", "🍋", "🍌", "🍉", "🍇", "🍓", "🍈", "🍒", "🍑", "🥭", "🍍", "🥥", "🥝", "🍅", "🍆", "🥑", "🥦", "🥬", "🥒", "🌶️", "🌽", "🥕", "🥔", "🍠", "🥐", "🍞", "🥖", "🥨"],
+    "activities": ["⚽", "🏀", "🏈", "⚾", "🥎", "🎾", "🏐", "🏉", "🥏", "🎱", "🏓", "🏸", "🏒", "🏑", "🥍", "🏏", "⛳", "🏹", "🎣", "🥊", "🥋", "🎽", "🛹", "🛷", "⛸️", "🥌", "🎿", "⛷️", "🏂", "🏋️"],
+    "travel": ["🚗", "🚕", "🚙", "🚌", "🚎", "🏎️", "🚓", "🚑", "🚒", "🚐", "🚚", "🚛", "🚜", "🛴", "🚲", "🛵", "🏍️", "🚨", "🚔", "🚍", "🚘", "🚖", "🚡", "🚠", "🚟", "🚃", "🚋", "🚞", "🚝", "🚄"],
+    "objects": ["⌚", "📱", "💻", "⌨️", "🖥️", "🖨️", "🖱️", "🖲️", "🕹️", "🗜️", "💽", "💾", "💿", "📀", "📼", "📷", "📸", "📹", "🎥", "📽️", "🎞️", "📞", "☎️", "📟", "📠", "📺", "📻", "🎙️", "🎚️", "🎛️"],
+    "symbols": ["❤️", "🧡", "💛", "💚", "💙", "💜", "🖤", "♥️", "💘", "💝", "💖", "💗", "💓", "💞", "💕", "💌", "💟", "☮️", "✝️", "☪️", "🕉️", "☸️", "✡️", "🔯", "🕎", "☯️", "☦️", "🛐", "⛎", "♈"]
+};
+      
+      // Add 'all' category with all emojis
+      emojiCategories.all = [].concat(...Object.values(emojiCategories));
+      
+      // Emoji mappings for auto-suggestion
+      const emojiMap = {
+        'smile': ['😊', '😃', '😄', '😁'],
+        'sad': ['😢', '😔', '😞', '😥'],
+        'heart': ['❤️', '💗', '💓', '💖'],
+        'happy': ['😄', '😊', '🙂', '😀'],
+        'laugh': ['😂', '🤣', '😆', '😹'],
+        'love': ['❤️', '😍', '🥰', '💕'],
+        'angry': ['😠', '😡', '🤬', '😤'],
+        'cry': ['😢', '😭', '😿', '🥲'],
+        'think': ['🤔', '💭', '🧐', '🤨'],
+        'surprise': ['😮', '😲', '😯', '😱'],
+        'thumbs': ['👍', '👎', '👌', '🤙'],
+        'clap': ['👏', '🙌', '👐', '🤝'],
+        'fire': ['🔥', '💥', '✨', '⚡'],
+        'cool': ['😎', '🆒', '👓', '🕶️'],
+        'party': ['🎉', '🎊', '🎈', '🥳'],
+        'sleep': ['😴', '💤', '🛌', '🥱'],
+        'food': ['🍕', '🍔', '🍗', '🍲'],
+        'drink': ['🍺', '🍷', '🍹', '☕'],
+        'sick': ['🤒', '🤢', '🤮', '😷'],
+        'star': ['⭐', '🌟', '✨', '💫']
+      };
+      
+      // Variables for scrolling with inertia
+      let isScrolling = false;
+      let scrollStartX = 0;
+      let scrollLeft = 0;
+      let momentumID;
+      let velocity = 0;
+      const friction = 0.95;
+      
+      // Initialize emoji panel with the first category
+      populateEmojiPanel('happy');
+      
+      // Add date indicator
+      const dateDivider = document.createElement('div');
+      dateDivider.classList.add('date-divider');
+      dateDivider.innerHTML = '<span>Today</span>';
+      chatMessages.appendChild(dateDivider);
+      
+      // Display welcome message immediately
+      addMessage('Hello! I\'m Nexus, your advanced AI assistant. I can help with daily routines, meal planning, activity suggestions, and much more. How can I assist you today?', 'incoming');
+      
+      // Toggle emoji panel
+      emojiButton.addEventListener('click', function() {
+        emojiPanel.classList.toggle('active');
+        
+        // If opening panel, populate with active category
+        if (emojiPanel.classList.contains('active')) {
+          const activeTab = emojiTabs.querySelector('.emoji-tab.active');
+          populateEmojiPanel(activeTab.dataset.category);
+        }
+      });
+      
+      // Switch emoji categories
+      emojiTabs.addEventListener('click', function(e) {
+        if (e.target.classList.contains('emoji-tab')) {
+          // Remove active class from all tabs
+          emojiTabs.querySelectorAll('.emoji-tab').forEach(tab => {
+            tab.classList.remove('active');
+          });
+          
+          // Add active class to clicked tab
+          e.target.classList.add('active');
+          
+          // Populate emoji panel with selected category
+          populateEmojiPanel(e.target.dataset.category);
+        }
+      });
+      
+      // Populate emoji panel with emojis from a category
+      function populateEmojiPanel(category) {
+        // Clear existing emojis
+        emojiContent.innerHTML = '';
+        
+        // Add emojis from the selected category
+        emojiCategories[category].forEach(emoji => {
+          const emojiElement = document.createElement('div');
+          emojiElement.classList.add('emoji-item');
+          emojiElement.textContent = emoji;
+          emojiElement.addEventListener('click', function() {
+            insertEmoji(emoji);
+          });
+          emojiContent.appendChild(emojiElement);
+        });
+      }
+      
+      // Insert emoji into message input
+      function insertEmoji(emoji) {
+        const cursorPos = messageInput.selectionStart;
+        const textBefore = messageInput.value.substring(0, cursorPos);
+        const textAfter = messageInput.value.substring(cursorPos);
+        
+        // Create animation
+        animateEmojiInsertion(emoji, cursorPos);
+        
+        // Close emoji panel
+        emojiPanel.classList.remove('active');
+      }
+      
+      function animateEmojiInsertion(emoji, cursorPos) {
+        // Get position for animation
+        const inputRect = messageInput.getBoundingClientRect();
+        const startX = inputRect.left + 100; // Start from middle of panel
+        const startY = emojiPanel.getBoundingClientRect().top + 50;
+        const endX = inputRect.left + 20 + (cursorPos * 8); // Approximate position based on cursor
+        const endY = inputRect.top + (inputRect.height / 2);
+        
+        // Set up the moving emoji for animation
+        movingEmoji.textContent = emoji;
+        movingEmoji.style.top = `${startY}px`;
+        movingEmoji.style.left = `${startX}px`;
+        movingEmoji.style.opacity = '1';
+        
+        // Animate the emoji moving to the input position
+        setTimeout(() => {
+          movingEmoji.style.top = `${endY}px`;
+          movingEmoji.style.left = `${endX}px`;
+          
+          // After animation completes, insert the emoji
+          setTimeout(() => {
+            movingEmoji.style.opacity = '0';
+            
+            // Insert emoji at cursor position
+            const textBefore = messageInput.value.substring(0, cursorPos);
+            const textAfter = messageInput.value.substring(cursorPos);
+            messageInput.value = textBefore + emoji + textAfter;
+            
+            // Move cursor after the inserted emoji
+            messageInput.setSelectionRange(cursorPos + emoji.length, cursorPos + emoji.length);
+            messageInput.focus();
+          }, 300);
+        }, 50);
+      }
+      
+      // Smooth scrolling with momentum for the suggestions container
+      inputSuggestionsContainer.addEventListener('wheel', function(e) {
+        if (e.deltaY !== 0) {
+          e.preventDefault();
+          
+          // Calculate how much to scroll - smoother and more responsive
+          const scrollAmount = e.deltaY * 0.5;
+          
+          // Use smooth scrolling behavior
+          this.scrollBy({
+            left: scrollAmount,
+            behavior: 'smooth'
+          });
+          
+          // Highlight the centered suggestion after scrolling completes
+          clearTimeout(momentumID);
+          momentumID = setTimeout(highlightCenteredSuggestion, 100);
+        }
+      });
+      
+      // Mouse-based momentum scrolling for suggestions
+      inputSuggestionsContainer.addEventListener('mousedown', function(e) {
+        isScrolling = true;
+        scrollStartX = e.pageX;
+        scrollLeft = inputSuggestionsContainer.scrollLeft;
+        clearTimeout(momentumID);
+        
+        // Set the container's style for smoother scrolling
+        inputSuggestionsContainer.style.scrollBehavior = 'auto';
+        
+        // Add event listeners for dragging
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+        
+        e.preventDefault();
+      });
+      
+      function onMouseMove(e) {
+        if (!isScrolling) return;
+        
+        const x = e.pageX;
+        const dragDistance = (scrollStartX - x) * 1.5; // Increased sensitivity
+        velocity = dragDistance * 0.1; // Calculate velocity based on drag distance
+        
+        inputSuggestionsContainer.scrollLeft = scrollLeft + dragDistance;
+      }
+      
+      function onMouseUp() {
+        isScrolling = false;
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+        
+        // Apply momentum scrolling
+        applyMomentum();
+        
+        // Restore smooth scrolling
+        setTimeout(() => {
+          inputSuggestionsContainer.style.scrollBehavior = 'smooth';
+        }, 300);
+      }
+      
+      function applyMomentum() {
+        if (Math.abs(velocity) < 0.5) {
+          highlightCenteredSuggestion();
+          return;
+        }
+        
+        inputSuggestionsContainer.scrollLeft += velocity;
+        velocity *= friction;
+        
+        momentumID = requestAnimationFrame(applyMomentum);
+      }
+      
+      // Function to highlight the centered suggestion
+      function highlightCenteredSuggestion() {
+        const containerRect = inputSuggestionsContainer.getBoundingClientRect();
+        const containerCenter = containerRect.left + containerRect.width / 2;
+        
+        let closestChip = null;
+        let closestDistance = Infinity;
+        
+        suggestionChips.forEach(chip => {
+          chip.classList.remove('active');
+          const chipRect = chip.getBoundingClientRect();
+          const chipCenter = chipRect.left + chipRect.width / 2;
+          const distance = Math.abs(containerCenter - chipCenter);
+          
+          if (distance < closestDistance) {
+            closestDistance = distance;
+            closestChip = chip;
+          }
+        });
+        
+        if (closestChip) {
+          closestChip.classList.add('active');
+          
+          // Optional: Auto-center the closest chip
+          if (closestDistance > 5) {
+            const chipRect = closestChip.getBoundingClientRect();
+            const chipCenter = chipRect.left + chipRect.width / 2;
+            const scrollAdjustment = chipCenter - containerCenter;
+            
+            inputSuggestionsContainer.scrollBy({
+              left: scrollAdjustment,
+              behavior: 'smooth'
+            });
+          }
+        }
+      }
+      
+      // Emoji suggestion functionality
+      messageInput.addEventListener('input', function() {
+        const text = this.value;
+        const lastWord = getLastWord(text);
+        
+        // Hide emoji suggestions if they're visible and no matching word
+        if (emojiSuggestions.classList.contains('visible')) {
+          if (!lastWord || !emojiMap[lastWord.toLowerCase()]) {
+            emojiSuggestions.classList.remove('visible');
+            emojiSuggestions.innerHTML = '';
+          }
+        }
+        
+        // Hide emoji panel when typing
+        if (emojiPanel.classList.contains('active')) {
+          emojiPanel.classList.remove('active');
+        }
+        
+        // Handle suggestions display
+        if (this.value.trim() === '') {
+          inputSuggestionsContainer.classList.remove('hidden');
+        } else {
+          inputSuggestionsContainer.classList.add('hidden');
+          
+          // Check if last word is an emoji keyword
+          if (lastWord && emojiMap[lastWord.toLowerCase()]) {
+            showEmojiSuggestions(lastWord.toLowerCase(), getCursorPosition());
+          }
+        }
+      });
+      
+      // Track cursor position for placing emoji suggestions
+      function getCursorPosition() {
+        return messageInput.selectionStart;
+      }
+      
+      // Get the last word of input text
+      function getLastWord(text) {
+        const words = text.split(/\s+/);
+        return words[words.length - 1];
+      }
+      
+      // Show emoji suggestions for the given word
+      function showEmojiSuggestions(word, position) {
+        // Clear existing emoji suggestions
+        emojiSuggestions.innerHTML = '';
+        
+        if (!emojiMap[word]) return;
+        
+        // Create emoji options
+        emojiMap[word].forEach((emoji, index) => {
+          const option = document.createElement('div');
+          option.classList.add('emoji-option');
+          if (index === 0) option.classList.add('active');
+          option.textContent = emoji;
+          option.dataset.emoji = emoji;
+          option.dataset.word = word;
+          
+          option.addEventListener('click', function(e) {
+            replaceWordWithEmoji(this.dataset.word, this.dataset.emoji);
+            e.stopPropagation();
+          });
+          
+          emojiSuggestions.appendChild(option);
+        });
+        
+        // Show emoji suggestions with animation
+        emojiSuggestions.classList.add('visible');
+      }
+      
+      // Replace the word with emoji
+      function replaceWordWithEmoji(word, emoji) {
+        const text = messageInput.value;
+        const cursorPos = getCursorPosition();
+        
+        // Find the word in the text near the cursor
+        const textBeforeCursor = text.substring(0, cursorPos);
+        const wordPos = textBeforeCursor.lastIndexOf(word);
+        
+        if (wordPos !== -1) {
+          // Get position and dimensions of the word
+          const tempSpan = document.createElement('span');
+          tempSpan.style.visibility = 'hidden';
+          tempSpan.style.position = 'absolute';
+          tempSpan.style.whiteSpace = 'pre';
+          tempSpan.style.font = window.getComputedStyle(messageInput).font;
+          tempSpan.textContent = text.substring(0, wordPos);
+          document.body.appendChild(tempSpan);
+          
+          const inputRect = messageInput.getBoundingClientRect();
+          const wordLeft = inputRect.left + tempSpan.offsetWidth;
+          const wordTop = inputRect.top + (inputRect.height / 2) - 11;
+          
+          document.body.removeChild(tempSpan);
+          
+          // Set up the moving emoji for animation
+          movingEmoji.textContent = emoji;
+          movingEmoji.style.top = `${emojiSuggestions.getBoundingClientRect().top + 19}px`;
+          movingEmoji.style.left = `${emojiSuggestions.querySelector('.emoji-option.active').getBoundingClientRect().left + 19}px`;
+          movingEmoji.style.opacity = '1';
+          
+          // Animate the emoji moving to the word position
+          setTimeout(() => {
+            movingEmoji.style.top = `${wordTop}px`;
+            movingEmoji.style.left = `${wordLeft}px`;
+            
+            // After animation completes, replace the word
+            setTimeout(() => {
+              movingEmoji.style.opacity = '0';
+              
+              // Construct new text with the emoji replacing the word
+              const newText = text.substring(0, wordPos) + emoji + text.substring(wordPos + word.length);
+              messageInput.value = newText;
+              
+              // Set cursor position after the emoji
+              messageInput.setSelectionRange(wordPos + emoji.length, wordPos + emoji.length);
+              messageInput.focus();
+              
+              // Hide emoji suggestions
+              emojiSuggestions.classList.remove('visible');
+            }, 300);
+          }, 50);
+        }
+      }
+      
+      // Arrow keys to navigate emoji suggestions
+      messageInput.addEventListener('keydown', function(e) {
+        if (emojiSuggestions.classList.contains('visible')) {
+          const activeOption = emojiSuggestions.querySelector('.emoji-option.active');
+          const options = emojiSuggestions.querySelectorAll('.emoji-option');
+          
+          if (e.key === 'ArrowRight') {
+            e.preventDefault();
+            const nextElem = activeOption.nextElementSibling || options[0];
+            activeOption.classList.remove('active');
+            nextElem.classList.add('active');
+          } else if (e.key === 'ArrowLeft') {
+            e.preventDefault();
+            const prevElem = activeOption.previousElementSibling || options[options.length - 1];
+            activeOption.classList.remove('active');
+            prevElem.classList.add('active');
+          } else if (e.key === 'Tab' || e.key === 'Enter') {
+            e.preventDefault();
+            const emoji = activeOption.dataset.emoji;
+            const word = activeOption.dataset.word;
+            replaceWordWithEmoji(word, emoji);
+          } else if (e.key === 'Escape') {
+            emojiSuggestions.classList.remove('visible');
+          }
+        } else if (emojiPanel.classList.contains('active') && e.key === 'Escape') {
+          emojiPanel.classList.remove('active');
+        }
+      });
+      
+      // Select suggestion chip with animation
+      suggestionChips.forEach(chip => {
+        chip.addEventListener('click', function(e) {
+          animateSuggestionToInput(this, this.textContent);
+          e.stopPropagation(); // Prevent other click handlers
+        });
+      });
+      
+      // Animate suggestion to input field
+      function animateSuggestionToInput(element, text) {
+        // Get positions
+        const rect = element.getBoundingClientRect();
+        const inputRect = messageInput.getBoundingClientRect();
+        
+        // Set initial position of moving element
+        movingSuggestion.style.top = rect.top + 'px';
+        movingSuggestion.style.left = rect.left + 'px';
+        movingSuggestion.style.width = rect.width + 'px';
+        movingSuggestion.style.height = rect.height + 'px';
+        movingSuggestion.textContent = text;
+        movingSuggestion.style.opacity = '1';
+        
+        // Animate to input field - perfectly centered in the input
+        setTimeout(() => {
+          // Calculate exact position to fit in input field
+          movingSuggestion.style.top = (inputRect.top + (inputRect.height/2 - rect.height/2)) + 'px';
+          movingSuggestion.style.left = (inputRect.left + 20) + 'px'; // Match the input padding
+          movingSuggestion.style.width = 'auto'; // Let it size to content
+          movingSuggestion.style.maxWidth = (inputRect.width - 40) + 'px'; // Match input width minus padding
+          movingSuggestion.style.background = 'transparent'; // Fade the background
+          movingSuggestion.style.borderColor = 'transparent'; // Fade the border
+          
+          // After animation completes
+          setTimeout(() => {
+            movingSuggestion.style.opacity = '0';
+            messageInput.value = text;
+            messageInput.focus();
+            inputSuggestionsContainer.classList.add('hidden');
+          }, 300);
+        }, 50);
+      }
+      
+      // Hide emoji panel when clicking elsewhere
+      document.addEventListener('click', function(e) {
+        if (!e.target.closest('#emoji-button') && !e.target.closest('#emoji-panel')) {
+          emojiPanel.classList.remove('active');
+        }
+        
+        // Hide emoji suggestions if clicking outside
+        if (!e.target.closest('.emoji-option') && !e.target.closest('#message-input')) {
+          emojiSuggestions.classList.remove('visible');
+        }
+      });
+      
+      // Also handle focus events for input
+      messageInput.addEventListener('focus', function() {
+        if (this.value.trim() === '') {
+          inputSuggestionsContainer.classList.remove('hidden');
+        }
+      });
+      
+      // Send message on button click
+      sendButton.addEventListener('click', sendMessage);
+      
+      // Send message on Enter key
+      messageInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && !emojiSuggestions.classList.contains('visible')) {
+          sendMessage();
+        }
+      });
+      
+      function sendMessage() {
+        const messageText = messageInput.value.trim();
+        if (messageText === '') return;
+        
+        // Add outgoing message
+        addMessage(messageText, 'outgoing');
+        messageInput.value = '';
+        
+        // Show suggestions again when input is cleared
+        inputSuggestionsContainer.classList.remove('hidden');
+        
+        // Show typing indicator with smooth scroll
+        showTypingIndicator();
+        
+        // Simulate AI thinking time based on message complexity
+        let thinkTime = 1200 + Math.random() * 1500;
+        if (messageText.length > 40) thinkTime += 1000;
+        if (messageText.includes('routine') || messageText.includes('plan') || messageText.includes('suggest')) {
+          thinkTime += 1500;
+        }
+        
+        setTimeout(() => {
+          removeTypingIndicator();
+          
+          // Process the message and generate a response
+          const response = generateResponse(messageText);
+          addMessage(response, 'incoming');
+          
+        }, thinkTime);
+      }
+      
+      function addMessage(text, type) {
+        const messageDiv = document.createElement('div');
+        messageDiv.classList.add('message', `message-${type}`);
+        
+        const contentDiv = document.createElement('div');
+        contentDiv.classList.add('message-content');
+        
+        // Check if the response is HTML (for formatted content)
+        if (text.includes('<routine-card>') || text.includes('<div class="list-card">') || text.includes('<div class="suggestion-grid">')) {
+          contentDiv.innerHTML = text;
+        } else {
+          contentDiv.textContent = text;
+        }
+        
+        // Add AI indicator for incoming messages
+        if (type === 'incoming') {
+          const aiIndicator = document.createElement('div');
+          aiIndicator.classList.add('ai-indicator');
+          aiIndicator.innerHTML = 'AI <span class="wave">•</span>';
+          contentDiv.appendChild(aiIndicator);
+        }
+        
+        const timeDiv = document.createElement('div');
+        timeDiv.classList.add('message-time');
+        timeDiv.textContent = getCurrentTime();
+        
+        messageDiv.appendChild(contentDiv);
+        messageDiv.appendChild(timeDiv);
+        
+        chatMessages.appendChild(messageDiv);
+        
+        // Scroll to the bottom
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+      
+      function showTypingIndicator() {
+        const typingDiv = document.createElement('div');
+        typingDiv.classList.add('typing-indicator');
+        typingDiv.id = 'typing-indicator';
+        
+        for (let i = 0; i < 3; i++) {
+          const dot = document.createElement('span');
+          dot.classList.add('typing-dot');
+          typingDiv.appendChild(dot);
+        }
+        
+        chatMessages.appendChild(typingDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+      
+      function removeTypingIndicator() {
+        const typingIndicator = document.getElementById('typing-indicator');
+        if (typingIndicator) {
+          typingIndicator.remove();
+        }
+      }
+      
+      function getCurrentTime() {
+        const now = new Date();
+        return now.getHours().toString().padStart(2, '0') + ':' + 
+               now.getMinutes().toString().padStart(2, '0');
+      }
+      
+      function generateDailyRoutine() {
+        return `<routine-card>
+          <div class="routine-header">
+            Daily Routine Plan
+          </div>
+          <div class="routine-item">
+            <div class="routine-time">6:30 AM</div>
+            <div class="routine-description">Wake up & hydrate with 16oz water</div>
+          </div>
+          <div class="routine-item">
+            <div class="routine-time">7:00 AM</div>
+            <div class="routine-description">15-minute light stretching or yoga</div>
+          </div>
+          <div class="routine-item">
+            <div class="routine-time">7:30 AM</div>
+            <div class="routine-description">Balanced breakfast: protein, healthy fats & complex carbs</div>
+          </div>
+          <div class="routine-item">
+            <div class="routine-time">8:30 AM</div>
+            <div class="routine-description">Focus work / productive hours with breaks</div>
+          </div>
+          <div class="routine-item">
+            <div class="routine-time">12:00 PM</div>
+            <div class="routine-description">Nourishing lunch & short walk</div>
+          </div>
+          <div class="routine-item">
+            <div class="routine-time">3:00 PM</div>
+            <div class="routine-description">Healthy snack & brief movement break</div>
+          </div>
+          <div class="routine-item">
+            <div class="routine-time">5:30 PM</div>
+            <div class="routine-description">30-45 min exercise (alternate cardio & strength)</div>
+          </div>
+          <div class="routine-item">
+            <div class="routine-time">7:00 PM</div>
+            <div class="routine-description">Nutrient-rich dinner with veggies</div>
+          </div>
+          <div class="routine-item">
+            <div class="routine-time">8:30 PM</div>
+            <div class="routine-description">Wind down: no screens, relaxing activity</div>
+          </div>
+          <div class="routine-item">
+            <div class="routine-time">10:00 PM</div>
+            <div class="routine-description">Sleep for 7-8 hours of quality rest</div>
+          </div>
+        </routine-card>
+        
+        This balanced routine incorporates nutrition, hydration, movement, productivity, and proper rest. Would you like me to customize any aspect of this plan for your specific needs?`;
+      }
+      
+      function generateMealSuggestions() {
+        return `<div class="list-card">
+          <div class="list-title">Healthy Meal Suggestions</div>
+          <div class="list-item"><strong>Breakfast:</strong> Greek yogurt with berries, nuts and honey; or overnight oats with chia seeds and fruit; or veggie omelet with whole grain toast.</div>
+          <div class="list-item"><strong>Lunch:</strong> Quinoa bowl with roasted vegetables and grilled chicken; or Mediterranean salad with chickpeas, feta and olive oil dressing; or lentil soup with mixed greens.</div>
+          <div class="list-item"><strong>Dinner:</strong> Baked salmon with sweet potato and steamed broccoli; or turkey and vegetable stir-fry with brown rice; or bean and vegetable chili with avocado.</div>
+          <div class="list-item"><strong>Snacks:</strong> Apple with almond butter; hummus with veggie sticks; trail mix with nuts and dried fruit; or protein smoothie with spinach and banana.</div>
+        </div>
+        
+        <div class="suggestion-grid">
+          <div class="suggestion-item">
+            <div class="suggestion-emoji">🥑</div>
+            <div class="suggestion-title">Power Breakfast</div>
+            <div class="suggestion-desc">Avocado toast on whole grain bread with poached eggs and a sprinkle of hemp seeds</div>
+          </div>
+          <div class="suggestion-item">
+            <div class="suggestion-emoji">🍲</div>
+            <div class="suggestion-title">Batch Cook</div>
+            <div class="suggestion-desc">Prepare grain bowls for the week with roasted veggies, proteins, and homemade dressing</div>
+          </div>
+          <div class="suggestion-item">
+            <div class="suggestion-emoji">💧</div>
+            <div class="suggestion-title">Hydration Tip</div>
+            <div class="suggestion-desc">Infuse water with cucumber, lemon or berries to encourage drinking throughout the day</div>
+          </div>
+          <div class="suggestion-item">
+            <div class="suggestion-emoji">🍓</div>
+            <div class="suggestion-title">Smart Snacking</div>
+            <div class="suggestion-desc">Keep cut fruit, prepared veggies, and portioned nuts ready for quick, healthy options</div>
+          </div>
+        </div>
+        
+        Would you like more specific meal ideas or recipes for any particular dietary preferences?`;
+      }
+      
+      function generateActivitySuggestions() {
+        return `<div class="list-card">
+          <div class="list-title">Daily Activity Recommendations</div>
+          <div class="list-item"><strong>Morning Boost:</strong> 10-minute high-intensity interval training (HIIT) or 15-minute yoga flow to energize for the day.</div>
+          <div class="list-item"><strong>Work Breaks:</strong> 5-minute stretching sessions every hour or two; alternate between desk stretches and brief walking breaks.</div>
+          <div class="list-item"><strong>Midday Movement:</strong> 15-30 minute walk after lunch to aid digestion and reset mental focus.</div>
+          <div class="list-item"><strong>Evening Activity:</strong> 30-45 minutes of moderate exercise like cycling, swimming, strength training, or a fitness class.</div>
+          <div class="list-item"><strong>Weekend Options:</strong> Longer outdoor activities like hiking, biking, kayaking, or team sports for both physical and mental benefits.</div>
+        </div>
+        
+        <div class="suggestion-grid">
+          <div class="suggestion-item">
+            <div class="suggestion-emoji">🧘</div>
+            <div class="suggestion-title">Mindful Moments</div>
+            <div class="suggestion-desc">Incorporate 10-min meditation or deep breathing sessions to reduce stress and improve focus</div>
+          </div>
+          <div class="suggestion-item">
+            <div class="suggestion-emoji">🚶</div>
+            <div class="suggestion-title">Step Goal</div>
+            <div class="suggestion-desc">Aim for 8,000-10,000 steps daily through intentional walks and daily movement</div>
+          </div>
+          <div class="suggestion-item">
+            <div class="suggestion-emoji">💪</div>
+            <div class="suggestion-title">Strength Focus</div>
+            <div class="suggestion-desc">Include bodyweight exercises like squats, push-ups and planks 2-3 times per week</div>
+          </div>
+          <div class="suggestion-item">
+            <div class="suggestion-emoji">🎯</div>
+            <div class="suggestion-title">Weekly Balance</div>
+            <div class="suggestion-desc">Mix cardio, strength, flexibility and rest days for complete fitness</div>
+          </div>
+        </div>
+        
+        Would you like me to create a more detailed weekly exercise plan tailored to your fitness level and goals?`;
+      }
+      
+      function generateWeeklyWorkout() {
+        return `<div class="list-card">
+          <div class="list-title">7-Day Workout Plan</div>
+          <div class="list-item"><strong>Monday:</strong> Upper body strength training (30-45 min) + 10 min core exercises</div>
+          <div class="list-item"><strong>Tuesday:</strong> 30 min cardio (running, cycling, or rowing) + mobility work</div>
+          <div class="list-item"><strong>Wednesday:</strong> Lower body strength training (30-45 min) + 15 min stretching</div>
+          <div class="list-item"><strong>Thursday:</strong> Active recovery: 30-40 min walking or light yoga</div>
+          <div class="list-item"><strong>Friday:</strong> Full body circuit training (30 min) or HIIT workout</div>
+          <div class="list-item"><strong>Saturday:</strong> Longer cardio session (45-60 min) or outdoor activity</div>
+          <div class="list-item"><strong>Sunday:</strong> Complete rest day or gentle yoga for recovery</div>
+        </div>
+        
+        This balanced plan incorporates strength, cardio, flexibility, and adequate recovery. Remember to warm up before each session and cool down after. Would you like specific exercises for any of these days?`;
+      }
+      
+      function generateMotivationalQuote() {
+        const quotes = [
+          "The only way to do great work is to love what you do. If you haven't found it yet, keep looking. Don't settle. - Steve Jobs",
+          "Success is not final, failure is not fatal: It is the courage to continue that counts. - Winston Churchill",
+          "Believe you can and you're halfway there. - Theodore Roosevelt",
+          "The future belongs to those who believe in the beauty of their dreams. - Eleanor Roosevelt",
+          "You are never too old to set another goal or to dream a new dream. - C.S. Lewis",
+          "The only limit to our realization of tomorrow will be our doubts of today. - Franklin D. Roosevelt",
+          "What you get by achieving your goals is not as important as what you become by achieving your goals. - Zig Ziglar",
+          "The mind is everything. What you think you become. - Buddha",
+          "Don't watch the clock; do what it does. Keep going. - Sam Levenson",
+          "Everything you've ever wanted is on the other side of fear. - George Addair"
+        ];
+        
+        const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+        return `"${randomQuote}"`;
+      }
+      
+      function generateSelfCareTips() {
+        return `<div class="list-card">
+          <div class="list-title">Self-Care Tips for Stress Relief</div>
+          <div class="list-item"><strong>Breathe:</strong> Practice deep breathing for 5 minutes (4 counts in, hold for 4, 6 counts out)</div>
+          <div class="list-item"><strong>Move:</strong> Even a 10-minute walk can reduce stress hormones and clear your mind</div>
+          <div class="list-item"><strong>Unplug:</strong> Set aside 30-60 minutes daily without screens or notifications</div>
+          <div class="list-item"><strong>Journal:</strong> Write down 3 things you're grateful for to shift focus to the positive</div>
+          <div class="list-item"><strong>Connect:</strong> Reach out to a supportive friend or family member</div>
+          <div class="list-item"><strong>Hydrate:</strong> Stress can be amplified by dehydration, so drink plenty of water</div>
+          <div class="list-item"><strong>Sleep:</strong> Prioritize 7-8 hours of quality sleep with a consistent schedule</div>
+          <div class="list-item"><strong>Nature:</strong> Spend time outdoors, even just 15 minutes can reduce stress levels</div>
+        </div>
+        
+        Would you like me to suggest a quick 5-minute stress relief exercise you can do right now?`;
+      }
+      
+      function generateEmailTemplate() {
+        return `<div class="list-card">
+          <div class="list-title">Professional Email Template</div>
+          <div class="list-item"><strong>Subject Line:</strong> [Specific Topic] - [Action Item/Timeline if applicable]</div>
+          <div class="list-item"><strong>Greeting:</strong> Dear [Name], / Hello [Name], / Good [morning/afternoon] [Name],</div>
+          <div class="list-item"><strong>Opening:</strong> I hope this email finds you well. / I'm reaching out regarding [topic].</div>
+          <div class="list-item"><strong>Main Content:</strong> 
+            [Paragraph 1: Context or background information]
+            [Paragraph 2: Specific details, requests, or information]
+            [Paragraph 3: Action items, deadlines, or next steps]</div>
+          <div class="list-item"><strong>Closing:</strong> Please let me know if you have any questions. / I look forward to your response. / Thank you for your consideration.</div>
+          <div class="list-item"><strong>Signature:</strong> 
+            Best regards, / Kind regards, / Sincerely,
+            [Your Name]
+            [Your Position]
+            [Contact Information]</div>
+        </div>
+        
+        Would you like me to draft a specific email for you? Just let me know the purpose and key information to include.`;
+      }
+      
+      function generateToDoTemplate() {
+        return `<div class="list-card">
+          <div class="list-title">Daily To-Do List Template</div>
+          <div class="list-item"><strong>Priority Tasks (Must Complete Today):</strong>
+            1. [Most important task]
+            2. [Second most important task]
+            3. [Third most important task]</div>
+          <div class="list-item"><strong>Secondary Tasks (Complete If Time Allows):</strong>
+            1. [Secondary task]
+            2. [Secondary task]
+            3. [Secondary task]</div>
+          <div class="list-item"><strong>Quick Wins (5-10 minutes each):</strong>
+            1. [Quick task]
+            2. [Quick task]
+            3. [Quick task]</div>
+          <div class="list-item"><strong>Appointments/Meetings:</strong>
+            • [Time]: [Meeting/appointment details]
+            • [Time]: [Meeting/appointment details]</div>
+          <div class="list-item"><strong>Self-Care & Well-being:</strong>
+            • [Exercise/movement plan]
+            • [Meal planning]
+            • [Personal time/relaxation]</div>
+          <div class="list-item"><strong>Notes & Reminders:</strong>
+            • [Any additional reminders]
+            • [Upcoming deadlines to keep in mind]</div>
+        </div>
+        
+        Would you like me to help you set up your to-do list for today or this week?`;
+      }
+      
+      function generateBookRecommendations() {
+        return `<div class="list-card">
+          <div class="list-title">Book Recommendations</div>
+          <div class="list-item"><strong>Fiction:</strong> "Project Hail Mary" by Andy Weir, "The Midnight Library" by Matt Haig, "The Lincoln Highway" by Amor Towles</div>
+          <div class="list-item"><strong>Non-Fiction:</strong> "Atomic Habits" by James Clear, "Four Thousand Weeks" by Oliver Burkeman, "Breath" by James Nestor</div>
+          <div class="list-item"><strong>Self-Development:</strong> "The Psychology of Money" by Morgan Housel, "Think Again" by Adam Grant, "Untamed" by Glennon Doyle</div>
+          <div class="list-item"><strong>Business:</strong> "Never Split the Difference" by Chris Voss, "Building a StoryBrand" by Donald Miller, "Range" by David Epstein</div>
+        </div>
+        
+        <div class="suggestion-grid">
+          <div class="suggestion-item">
+            <div class="suggestion-emoji">📚</div>
+            <div class="suggestion-title">Science Fiction</div>
+            <div class="suggestion-desc">"The Three-Body Problem" by Liu Cixin, "Dune" by Frank Herbert</div>
+          </div>
+          <div class="suggestion-item">
+            <div class="suggestion-emoji">🧠</div>
+            <div class="suggestion-title">Psychology</div>
+            <div class="suggestion-desc">"Thinking, Fast and Slow" by Daniel Kahneman, "Quiet" by Susan Cain</div>
+          </div>
+          <div class="suggestion-item">
+            <div class="suggestion-emoji">🏃</div>
+            <div class="suggestion-title">Motivation</div>
+            <div class="suggestion-desc">"Can't Hurt Me" by David Goggins, "The Mountain Is You" by Brianna Wiest</div>
+          </div>
+          <div class="suggestion-item">
+            <div class="suggestion-emoji">🌱</div>
+            <div class="suggestion-title">Mindfulness</div>
+            <div class="suggestion-desc">"The Things You Can See Only When You Slow Down" by Haemin Sunim</div>
+          </div>
+        </div>
+        
+        Would you like more targeted recommendations based on your preferences or a specific genre?`;
+      }
+      
+      function generateMorningRoutine() {
+        return `<div class="list-card">
+          <div class="list-title">Optimal Morning Routine</div>
+          <div class="list-item"><strong>5:30-6:00 AM:</strong> Wake up naturally (avoid hitting snooze)</div>
+          <div class="list-item"><strong>6:00-6:10 AM:</strong> Hydrate with room temperature water with lemon</div>
+          <div class="list-item"><strong>6:10-6:30 AM:</strong> Light movement/stretching to activate your body</div>
+          <div class="list-item"><strong>6:30-6:45 AM:</strong> Mindfulness practice (meditation or journaling)</div>
+          <div class="list-item"><strong>6:45-7:15 AM:</strong> Shower and get ready for the day</div>
+          <div class="list-item"><strong>7:15-7:45 AM:</strong> Nutritious breakfast without distractions</div>
+          <div class="list-item"><strong>7:45-8:00 AM:</strong> Review your day's priorities and set intentions</div>
+        </div>
+        
+        <div class="suggestion-grid">
+          <div class="suggestion-item">
+            <div class="suggestion-emoji">☀️</div>
+            <div class="suggestion-title">Light Exposure</div>
+            <div class="suggestion-desc">Get natural sunlight within 30-60 minutes of waking to regulate your circadian rhythm</div>
+          </div>
+          <div class="suggestion-item">
+            <div class="suggestion-emoji">📱</div>
+            <div class="suggestion-title">Digital Detox</div>
+            <div class="suggestion-desc">Avoid checking emails or social media for the first hour after waking</div>
+          </div>
+          <div class="suggestion-item">
+            <div class="suggestion-emoji">🧠</div>
+            <div class="suggestion-title">Priming</div>
+            <div class="suggestion-desc">Visualize your day going well and set positive intentions for 5 minutes</div>
+          </div>
+          <div class="suggestion-item">
+            <div class="suggestion-emoji">🌿</div>
+            <div class="suggestion-title">Morning Tea</div>
+            <div class="suggestion-desc">Green tea provides gentle caffeine and antioxidants for sustained energy</div>
+          </div>
+        </div>
+        
+        Would you like me to help you design a personalized morning routine based on your specific goals and schedule?`;
+      }
+      
+      function generateProductivityTips() {
+        return `<div class="list-card">
+          <div class="list-title">Productivity Enhancement Tips</div>
+          <div class="list-item"><strong>Time Blocking:</strong> Schedule specific blocks for different types of work rather than multitasking</div>
+          <div class="list-item"><strong>Pomodoro Technique:</strong> Work in focused 25-minute intervals with 5-minute breaks</div>
+          <div class="list-item"><strong>2-Minute Rule:</strong> If a task takes less than 2 minutes, do it immediately rather than scheduling it</div>
+          <div class="list-item"><strong>Eat the Frog:</strong> Complete your most challenging or important task first thing in the morning</div>
+          <div class="list-item"><strong>Digital Minimalism:</strong> Turn off notifications and schedule specific times to check email/messages</div>
+          <div class="list-item"><strong>Energy Management:</strong> Schedule demanding tasks during your peak energy hours</div>
+          <div class="list-item"><strong>Weekly Review:</strong> Set aside 30 minutes each week to review progress and plan ahead</div>
+        </div>
+        
+        <div class="suggestion-grid">
+          <div class="suggestion-item">
+            <div class="suggestion-emoji">📊</div>
+            <div class="suggestion-title">Eisenhower Matrix</div>
+            <div class="suggestion-desc">Organize tasks by urgency and importance to prioritize effectively</div>
+          </div>
+          <div class="suggestion-item">
+            <div class="suggestion-emoji">🧠</div>
+            <div class="suggestion-title">Mind Sweeping</div>
+            <div class="suggestion-desc">Write down everything on your mind to clear mental space and reduce cognitive load</div>
+          </div>
+          <div class="suggestion-item">
+            <div class="suggestion-emoji">⏱️</div>
+            <div class="suggestion-title">Timeboxing</div>
+            <div class="suggestion-desc">Assign fixed time periods to activities to create deadlines and prevent perfectionism</div>
+          </div>
+          <div class="suggestion-item">
+            <div class="suggestion-emoji">🌱</div>
+            <div class="suggestion-title">System Habits</div>
+            <div class="suggestion-desc">Focus on building systems rather than goals - what you do daily matters more than targets</div>
+          </div>
+        </div>
+        
+        Would you like me to suggest a productivity system that might work well for your specific challenges or work style?`;
+      }
+      
+      function generateResponse(input) {
+        const lowerInput = input.toLowerCase();
+        
+        // Weekly workout plan
+        if (lowerInput.includes('weekly') && 
+            (lowerInput.includes('workout') || lowerInput.includes('exercise') || lowerInput.includes('fitness'))) {
+          return generateWeeklyWorkout();
+        }
+        
+        // Daily routine plan
+        if (lowerInput.includes('routine') || lowerInput.includes('daily plan') || (lowerInput.includes('plan') && lowerInput.includes('day'))) {
+          return generateDailyRoutine();
+        }
+        
+        // Morning routine
+        if ((lowerInput.includes('morning') || lowerInput.includes('wake up')) && 
+            (lowerInput.includes('routine') || lowerInput.includes('ritual') || lowerInput.includes('idea'))) {
+          return generateMorningRoutine();
+        }
+        
+        // Food suggestions
+        if ((lowerInput.includes('food') || lowerInput.includes('meal') || lowerInput.includes('eat')) && 
+            (lowerInput.includes('suggest') || lowerInput.includes('recommend') || lowerInput.includes('healthy'))) {
+          return generateMealSuggestions();
+        }
+        
+        // Activity suggestions
+        if ((lowerInput.includes('activity') || lowerInput.includes('exercise') || lowerInput.includes('workout')) && 
+            (lowerInput.includes('suggest') || lowerInput.includes('recommend'))) {
+          return generateActivitySuggestions();
+        }
+        
+        // Email template
+        if (lowerInput.includes('email') && (lowerInput.includes('write') || lowerInput.includes('template') || lowerInput.includes('help'))) {
+          return generateEmailTemplate();
+        }
+        
+        // To-do list
+        if ((lowerInput.includes('to-do') || lowerInput.includes('todo') || lowerInput.includes('to do') || lowerInput.includes('task')) && 
+            (lowerInput.includes('list') || lowerInput.includes('template'))) {
+          return generateToDoTemplate();
+        }
+        
+        // Motivational quote
+        if ((lowerInput.includes('quote') || lowerInput.includes('motivation') || lowerInput.includes('inspire')) || 
+            (lowerInput.includes('tell') && lowerInput.includes('motivational'))) {
+          return generateMotivationalQuote();
+        }
+        
+        // Self-care tips
+        if ((lowerInput.includes('self') && lowerInput.includes('care')) || 
+            lowerInput.includes('stress') || lowerInput.includes('relax') || lowerInput.includes('anxiety')) {
+          return generateSelfCareTips();
+        }
+        
+        // Book recommendations
+        if (lowerInput.includes('book') && (lowerInput.includes('recommend') || lowerInput.includes('suggest') || lowerInput.includes('read'))) {
+          return generateBookRecommendations();
+        }
+        
+        // Productivity tips
+        if (lowerInput.includes('productive') || lowerInput.includes('productivity') || lowerInput.includes('focus') || 
+            (lowerInput.includes('time') && lowerInput.includes('management'))) {
+          return generateProductivityTips();
+        }
+        
+        // How was your day
+        if (lowerInput.includes('how') && (lowerInput.includes('day') || lowerInput.includes('doing'))) {
+          return "My day has been quite productive! I've been assisting people with planning, answering questions, and solving problems. Every interaction helps me learn and improve. How has your day been going? Is there anything specific I can help you with to make it better?";
+        }
+        
+        // Greetings
+        if (lowerInput.match(/^(hello|hi|hey|greetings|good morning|good afternoon|good evening)($|\s)/)) {
+          const greetings = [
+            "Hello there! How can I assist you today?",
+            "Hi! I'm ready to help with whatever you need. What's on your mind?",
+            "Hey! I'm here and ready to assist. What can I help you with?",
+            "Greetings! How may I be of service today?",
+            "Hello! I'm excited to help you today. What would you like to know or discuss?"
+          ];
+          return greetings[Math.floor(Math.random() * greetings.length)];
+        }
+        
+        // Goodbyes
+        if (lowerInput.includes('bye') || lowerInput.includes('goodbye') || lowerInput.includes('see you')) {
+          return "Goodbye! It was a pleasure assisting you. Feel free to reach out whenever you need help again. Have a wonderful day!";
+        }
+        
+        // Name questions
+        if (lowerInput.includes('your name') || lowerInput.includes("who are you") || lowerInput.match(/^(what's|what is|whats) your name$/)) {
+          return "I'm Nexus, an advanced AI assistant designed to provide helpful, accurate, and thoughtful responses. I can assist with planning, information, creative tasks, and much more. How can I help you today?";
+        }
+        
+        // Thank you
+        if (lowerInput.includes('thank') || lowerInput.includes('thanks')) {
+          return "You're very welcome! I'm glad I could be of assistance. Is there anything else you'd like help with today?";
+        }
+
+        // Add these to the existing switch-like logic in the generateResponse function
+// These can be added right before the default responses section
+
+// Health and wellness queries
+if (lowerInput.includes('health') || lowerInput.includes('wellness') || lowerInput.includes('lifestyle')) {
+  return "Maintaining a healthy lifestyle involves a holistic approach. Would you like suggestions on nutrition, exercise, mental health, or stress management? I can provide comprehensive advice tailored to your specific needs.";
+}
+
+// Sleep-related queries
+if (lowerInput.includes('sleep') || lowerInput.includes('insomnia') || lowerInput.includes('rest')) {
+  return `Here are some quick sleep tips:
+1. Maintain a consistent sleep schedule
+2. Create a relaxing bedtime routine
+3. Avoid screens 1 hour before bed
+4. Keep your bedroom cool and dark
+5. Practice relaxation techniques like deep breathing
+
+Would you like a more detailed sleep improvement plan?`;
+}
+
+// Mental health support
+if ((lowerInput.includes('mental') && lowerInput.includes('health')) || 
+    lowerInput.includes('anxiety') || lowerInput.includes('depression') || 
+    lowerInput.includes('stress')) {
+  return "Mental health is crucial. While I can offer general support and coping strategies, I want to emphasize that professional help from a licensed therapist or counselor is always recommended for specific mental health concerns. Would you like some general stress management techniques or self-care tips?";
+}
+
+// Learning and personal development
+if (lowerInput.includes('learn') || lowerInput.includes('skill') || 
+    lowerInput.includes('improve') || lowerInput.includes('develop')) {
+  return `Continuous learning is key to personal growth. Here are some strategies:
+1. Set clear, achievable goals
+2. Practice consistent daily learning
+3. Use diverse learning resources (books, courses, podcasts)
+4. Apply what you learn practically
+5. Stay curious and open-minded
+
+What specific skill or area would you like to develop?`;
+}
+
+// Financial wellness
+if (lowerInput.includes('money') || lowerInput.includes('finance') || 
+    lowerInput.includes('budget') || lowerInput.includes('saving')) {
+  return `Financial wellness involves:
+1. Creating and sticking to a budget
+2. Building an emergency fund
+3. Understanding and managing debt
+4. Investing for the future
+5. Continuous financial education
+
+Would you like some practical tips for improving your financial health?`;
+}
+
+// Career development
+if (lowerInput.includes('career') || lowerInput.includes('job') || 
+    lowerInput.includes('work') || lowerInput.includes('profession')) {
+  return `Career development is an ongoing journey. Key strategies include:
+1. Continuous skill enhancement
+2. Networking
+3. Setting clear career goals
+4. Seeking mentorship
+5. Staying adaptable in a changing job market
+
+What aspect of your career would you like to focus on improving?`;
+}
+
+// Relationship and communication
+if (lowerInput.includes('relationship') || lowerInput.includes('communicate') || 
+    lowerInput.includes('communication') || lowerInput.includes('connect')) {
+  return `Strong relationships rely on:
+1. Active listening
+2. Empathy
+3. Clear and honest communication
+4. Respect for boundaries
+5. Regular meaningful interactions
+
+Would you like advice on improving personal or professional relationships?`;
+}
+
+// Technology and digital wellness
+if (lowerInput.includes('technology') || lowerInput.includes('digital') || 
+    lowerInput.includes('screen time') || lowerInput.includes('tech')) {
+  return `Digital wellness is about balanced technology use:
+1. Set screen time limits
+2. Practice digital detox
+3. Use technology intentionally
+4. Prioritize real-world connections
+5. Protect your mental and physical health
+
+Interested in strategies to improve your digital well-being?`;
+}
+ 
+ // Emoji-specific responses
+const emojiResponses = {
+  '😊': [
+    "Glad to see you're happy! What's making you smile today?",
+    "That's a cheerful emoji! Spreading some positivity, I see.",
+    "Happiness looks good on you! Care to share what's bringing you joy?"
+  ],
+  '😢': [
+    "I sense you might be feeling sad. Would you like to talk about what's troubling you?",
+    "It seems like you're going through a tough moment. Remember, it's okay to feel your emotions.",
+    "Sending virtual support. Is there anything I can do to help?"
+  ],
+  '😍': [
+    "Love is in the air! What's got you feeling so passionate?",
+    "Wow, that's a look of pure adoration. Care to tell me more?",
+    "Seems like something or someone has captured your heart completely!"
+  ],
+  '😴': [
+    "Feeling sleepy? Maybe it's time for a power nap or some rest.",
+    "Looks like you could use some quality sleep. Want some tips for better rest?",
+    "Tiredness can be your body's way of asking for a break. How about a relaxation routine?"
+  ],
+  '🤔': [
+    "Deep in thought? Sometimes pondering leads to great insights.",
+    "Looks like you're contemplating something. Want to brainstorm?",
+    "Thinking mode activated! What's on your mind?"
+  ],
+  '😂': [
+    "Laughing out loud! Nothing beats a good sense of humor.",
+    "That's a hearty laugh! What's so funny?",
+    "Laughter is the best medicine. Keep smiling!"
+  ],
+  '❤️': [
+    "Love is a powerful emotion. Spreading some positivity today?",
+    "Sending love and positive vibes your way!",
+    "The heart emoji - a universal symbol of affection and care."
+  ],
+  '🤯': [
+    "Mind blown! Sounds like something incredible just happened.",
+    "Wow, that must have been quite a revelation!",
+    "Sometimes life throws us surprising moments. Care to share?"
+  ],
+  '🌟': [
+    "Shine bright! Looks like you're feeling inspired or celebratory.",
+    "Sparkling with potential! What's making you feel stellar today?",
+    "Every star represents a dream, an aspiration. What's yours?"
+  ],
+  '🙏': [
+    "A moment of gratitude or hope. What are you thankful for today?",
+    "Sending positive thoughts and energy your way.",
+    "Sometimes we all need a moment of reflection and peace."
+  ]
+};  
+
+ const emojiRegex = /^[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}]+$/u;
+
+  // Check if the input is a single emoji
+  if (emojiRegex.test(input)) {
+    const matchedResponses = emojiResponses[input];
+    if (matchedResponses) {
+      return matchedResponses[Math.floor(Math.random() * matchedResponses.length)];
+    }
+  }     
+        // Default responses with more personality
+        const defaultResponses = [
+          "That's an interesting topic. I'd love to explore that further with you. Could you share more about what specific aspects you're interested in?",
+          "I find that question intriguing. To provide the most helpful response, could you tell me a bit more about what you're looking to accomplish?",
+          "I'd be happy to assist with that. To give you the most relevant information, could you share any specific requirements or preferences you have?",
+          "That's something I can definitely help with. To personalize my response, could you tell me a bit more about your situation or goals?",
+          "I'm here to help with that. Would you like a comprehensive overview, or are you looking for specific information about a particular aspect?"
+        ];
+        
+        return defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
+      }
+      
+      // Randomly rotate suggestion chips
+      function rotateSuggestionChips() {
+        const allSuggestions = [
+          "How do I create a meal plan?",
+          "Morning routine ideas",
+          "Productivity tips",
+          "Best exercises for beginners",
+          "Recommend healthy snacks",
+          "How to reduce stress?",
+          "Tips for better sleep",
+          "Help me set fitness goals",
+          "Ideas for quick healthy meals",
+          "Recommend a meditation app",
+          "How to stay motivated?",
+          "Weekend activity ideas",
+          "Help with time management",
+          "How to drink more water?",
+          "What should I read next?"
+        ];
+        
+        // Select 5 random suggestions
+        const shuffled = [...allSuggestions].sort(() => 0.5 - Math.random());
+        const selected = shuffled.slice(0, 5);
+        
+        // Get current suggestions
+        const suggestions = document.querySelectorAll('.suggestion-chip');
+        
+        // Update the text content
+        suggestions.forEach((chip, index) => {
+          if (selected[index]) {
+            chip.textContent = selected[index];
+          }
+        });
+        
+        // Highlight the centered suggestion
+        setTimeout(highlightCenteredSuggestion, 100);
+      }
+      
+      // Rotate suggestions every 45 seconds
+      setInterval(rotateSuggestionChips, 45000);
+      
+      // Initialize by highlighting the centered suggestion
+      setTimeout(highlightCenteredSuggestion, 500);
+    });
+  </script>
+</body>
+</html>
